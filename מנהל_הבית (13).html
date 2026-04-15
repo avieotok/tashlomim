@@ -1,0 +1,1182 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>מנהל הבית</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#fff;--bg2:#f5f5f4;--bg3:#efede8;
+  --txt:#1a1a18;--txt2:#6b6b66;--txt3:#9b9b95;
+  --border:rgba(0,0,0,0.12);--border2:rgba(0,0,0,0.22);
+  --r:8px;--rl:12px;
+  --green:#1D9E75;--green2:#0F6E56;
+  --red-bg:#FCEBEB;--red-txt:#A32D2D;
+  --warn-bg:#FAEEDA;--warn-txt:#854F0B;
+  --ok-bg:#EAF3DE;--ok-txt:#3B6D11;
+  --info-bg:#E6F1FB;--info-txt:#185FA5;
+}
+@media(prefers-color-scheme:dark){:root{--bg:#1e1e1c;--bg2:#2a2a28;--bg3:#323230;--txt:#f0f0ec;--txt2:#a0a09a;--txt3:#707068;--border:rgba(255,255,255,0.12);--border2:rgba(255,255,255,0.22);--red-bg:#3a1515;--red-txt:#f09595;--warn-bg:#2e2010;--warn-txt:#FAC775;--ok-bg:#152510;--ok-txt:#C0DD97;--info-bg:#0a1e30;--info-txt:#85B7EB;}}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg3);color:var(--txt);min-height:100vh;padding:16px}
+.app-shell{max-width:860px;margin:0 auto;background:var(--bg);border-radius:16px;border:0.5px solid var(--border);overflow:hidden}
+.app-header{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;border-bottom:0.5px solid var(--border)}
+.hdr-left{display:flex;align-items:center;gap:10px}
+.hdr-title{font-size:18px;font-weight:500;display:flex;align-items:center;gap:8px}
+.hdr-icon{width:28px;height:28px;background:var(--green);border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.hdr-right{display:flex;align-items:center;gap:7px}
+.hdr-date{font-size:12px;color:var(--txt2)}
+.app-tabs{display:flex;gap:2px;padding:10px 20px;border-bottom:0.5px solid var(--border);overflow-x:auto}
+.tab{padding:6px 14px;border-radius:var(--r);border:0.5px solid transparent;background:transparent;cursor:pointer;font-size:13px;color:var(--txt2);font-family:inherit;white-space:nowrap}
+.tab.on{background:var(--bg2);border-color:var(--border2);color:var(--txt);font-weight:500}
+.tab:hover:not(.on){background:var(--bg2)}
+.app-body{padding:18px 20px;min-height:400px}
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:18px}
+@media(max-width:540px){.stats-grid{grid-template-columns:repeat(2,1fr)}}
+.stat{background:var(--bg2);border-radius:var(--r);padding:12px 14px}
+.stat-lbl{font-size:11px;color:var(--txt2);margin-bottom:5px}
+.stat-val{font-size:22px;font-weight:500}
+.section-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:6px}
+.sec-title{font-size:14px;font-weight:500}
+.hdr-btns{display:flex;gap:5px}
+.btn-add{padding:6px 12px;background:var(--bg2);border:0.5px solid var(--border2);border-radius:var(--r);cursor:pointer;font-size:12px;font-family:inherit;color:var(--txt)}
+.btn-add:hover{background:var(--bg3)}
+.btn-scan{padding:6px 13px;background:#1D9E75;border:none;border-radius:var(--r);cursor:pointer;font-size:12px;font-family:inherit;color:#fff;font-weight:500}
+.btn-scan:hover{background:#0F6E56}
+.btn-settings{padding:5px 10px;background:transparent;border:0.5px solid var(--border);border-radius:var(--r);cursor:pointer;font-size:13px;font-family:inherit;color:var(--txt2)}
+.btn-settings:hover{background:var(--bg2)}
+.badge{display:inline-block;padding:2px 8px;border-radius:var(--r);font-size:11px;font-weight:500}
+.b-ok{background:var(--ok-bg);color:var(--ok-txt)}.b-warn{background:var(--warn-bg);color:var(--warn-txt)}.b-exp{background:var(--red-bg);color:var(--red-txt)}.b-paid{background:var(--ok-bg);color:var(--ok-txt)}.b-due{background:var(--warn-bg);color:var(--warn-txt)}.b-over{background:var(--red-bg);color:var(--red-txt)}
+.cards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:9px}
+.prod-card{background:var(--bg);border:0.5px solid var(--border);border-radius:var(--rl);padding:13px 15px}
+.prod-name{font-size:14px;font-weight:500;margin-bottom:2px}
+.prod-sub{font-size:11px;color:var(--txt2);margin-bottom:7px}
+.prod-meta{font-size:11px;color:var(--txt2);margin-top:5px;line-height:1.6}
+.prod-acts{display:flex;gap:5px;margin-top:9px;flex-wrap:wrap}
+.btn-sm{padding:3px 9px;border-radius:var(--r);border:0.5px solid var(--border2);background:transparent;cursor:pointer;font-size:11px;font-family:inherit;color:var(--txt2)}
+.btn-sm:hover{background:var(--bg2)}
+.btn-del{color:var(--red-txt);border-color:transparent}
+.btn-doc{color:var(--info-txt);border-color:rgba(24,95,165,0.2)}
+.bill-list{background:var(--bg);border:0.5px solid var(--border);border-radius:var(--rl);overflow:hidden;margin-bottom:8px}
+.bill-row{display:flex;align-items:center;gap:8px;padding:10px 14px;border-bottom:0.5px solid var(--border)}
+.bill-row:last-child{border-bottom:none}
+.bill-name{font-size:13px;font-weight:500}
+.bill-period{font-size:11px;color:var(--txt2)}
+.bill-amt{font-size:13px;font-weight:500;min-width:70px;text-align:left}
+.alert-item{display:flex;gap:9px;padding:9px 12px;border-radius:var(--r);margin-bottom:7px}
+.a-warn{background:var(--warn-bg)}.a-danger{background:var(--red-bg)}
+.a-title{font-size:12px;font-weight:500}
+.a-warn .a-title{color:var(--warn-txt)}.a-danger .a-title{color:var(--red-txt)}
+.a-sub{font-size:11px;color:var(--txt2)}
+.empty{text-align:center;padding:40px 16px;color:var(--txt2);font-size:13px}
+.divider{border:none;border-top:0.5px solid var(--border);margin:14px 0}
+.total-row{text-align:left;margin-top:8px;font-size:12px;color:var(--txt2)}
+.wbar{height:3px;border-radius:2px;background:var(--border);margin-top:7px;overflow:hidden}
+.wfill{height:100%;border-radius:2px}
+.form-wrap{max-width:520px}
+.field{margin-bottom:12px}
+.field label{display:block;font-size:12px;color:var(--txt2);margin-bottom:4px}
+.field input,.field select,.field textarea{width:100%;padding:8px 10px;border:0.5px solid var(--border2);border-radius:var(--r);background:var(--bg);color:var(--txt);font-family:inherit;font-size:13px}
+.field textarea{resize:vertical;min-height:60px}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.btn-primary{padding:8px 20px;background:var(--green);border:none;border-radius:var(--r);color:#fff;font-size:13px;font-weight:500;cursor:pointer;font-family:inherit}
+.btn-primary:hover{background:var(--green2)}
+.btn-cancel{padding:8px 16px;background:transparent;border:0.5px solid var(--border2);border-radius:var(--r);color:var(--txt2);font-size:13px;cursor:pointer;font-family:inherit}
+.btn-cancel:hover{background:var(--bg2)}
+.search-inp{width:100%;padding:9px 14px;border:0.5px solid var(--border2);border-radius:var(--rl);font-family:inherit;font-size:13px;background:var(--bg);color:var(--txt);margin-bottom:10px}
+.filter-btns{display:flex;gap:5px;margin-bottom:10px;flex-wrap:wrap}
+.filter-btn{padding:5px 12px;border-radius:var(--r);border:0.5px solid var(--border);background:transparent;cursor:pointer;font-size:12px;font-family:inherit;color:var(--txt2)}
+.filter-btn.on{background:var(--bg2);border-color:var(--border2);color:var(--txt);font-weight:500}
+.date-filter{display:flex;align-items:center;gap:8px;margin-bottom:12px;flex-wrap:wrap;font-size:12px;color:var(--txt2)}
+.date-inp{padding:6px 9px;border:0.5px solid var(--border2);border-radius:var(--r);font-size:12px;background:var(--bg);color:var(--txt);font-family:inherit}
+.err{font-size:11px;color:var(--red-txt);min-height:16px;margin-top:3px}
+.hint{font-size:10px;color:var(--txt3);margin-top:2px}
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.52);display:flex;align-items:center;justify-content:center;z-index:999;padding:16px}
+.modal-panel{background:var(--bg);border-radius:var(--rl);border:0.5px solid var(--border2);width:100%;max-width:680px;max-height:92vh;overflow:hidden;display:flex;flex-direction:column}
+.modal-header{display:flex;align-items:center;justify-content:space-between;padding:13px 16px;border-bottom:0.5px solid var(--border);flex-shrink:0}
+.modal-title{font-size:14px;font-weight:500}
+.modal-tabs{display:flex;gap:3px;padding:8px 16px;border-bottom:0.5px solid var(--border);flex-shrink:0;overflow-x:auto}
+.vtab{padding:5px 12px;border-radius:var(--r);border:0.5px solid transparent;background:transparent;cursor:pointer;font-size:12px;font-family:inherit;color:var(--txt2);white-space:nowrap}
+.vtab.on{background:var(--bg2);border-color:var(--border2);color:var(--txt);font-weight:500}
+.vtab:hover:not(.on){background:var(--bg2)}
+.modal-body{padding:16px;overflow-y:auto;flex:1}
+.detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+@media(max-width:420px){.detail-grid{grid-template-columns:1fr}}
+.detail-field{background:var(--bg2);border-radius:var(--r);padding:9px 12px}
+.detail-lbl{font-size:10px;color:var(--txt2);margin-bottom:3px}
+.detail-val{font-size:13px;font-weight:500}
+.doc-list{display:flex;flex-direction:column;gap:7px;margin-bottom:14px}
+.doc-item{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--bg2);border-radius:var(--r);border:0.5px solid var(--border)}
+.doc-icon{width:32px;height:32px;border-radius:6px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:16px}
+.doc-icon-pdf{background:#FAECE7}.doc-icon-img{background:#E6F1FB}.doc-icon-link{background:#EAF3DE}.doc-icon-other{background:var(--bg3)}
+.doc-info{flex:1;min-width:0}
+.doc-name{font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.doc-meta{font-size:11px;color:var(--txt2)}
+.doc-actions{display:flex;gap:4px}
+.doc-preview{margin-top:12px;border-radius:var(--r);overflow:hidden;border:0.5px solid var(--border)}
+.doc-preview img{width:100%;display:block;max-height:380px;object-fit:contain;background:var(--bg2)}
+.doc-preview iframe{width:100%;height:400px;border:none;display:block}
+.doc-preview-url{padding:16px;background:var(--bg2);border-radius:var(--r);text-align:center}
+.add-doc-form{background:var(--bg2);border-radius:var(--r);padding:13px;border:0.5px solid var(--border)}
+.add-doc-tabs{display:flex;gap:4px;margin-bottom:10px}
+.adtab{padding:4px 11px;border-radius:var(--r);border:0.5px solid transparent;background:transparent;cursor:pointer;font-size:12px;font-family:inherit;color:var(--txt2)}
+.adtab.on{background:var(--bg);border-color:var(--border2);color:var(--txt)}
+.upload-zone{border:1.5px dashed var(--border2);border-radius:var(--r);padding:22px;text-align:center;cursor:pointer;background:var(--bg)}
+.upload-zone:hover{background:var(--bg2)}
+/* SCAN MODAL */
+.scan-drop-zone{border:2px dashed var(--border2);border-radius:var(--rl);padding:32px 20px;text-align:center;cursor:pointer;background:var(--bg2);transition:border-color 0.15s,background 0.15s}
+.scan-drop-zone:hover,.scan-drop-zone.drag{border-color:var(--green);background:var(--ok-bg)}
+.scan-drop-icon{font-size:36px;margin-bottom:10px}
+.scan-drop-title{font-size:14px;font-weight:500;margin-bottom:4px}
+.scan-drop-sub{font-size:12px;color:var(--txt2)}
+.scan-preview-img{max-width:100%;max-height:220px;border-radius:var(--r);border:0.5px solid var(--border);display:block;margin:0 auto}
+.scan-status{display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:var(--r);margin:12px 0;font-size:13px}
+.scan-status.loading{background:var(--info-bg);color:var(--info-txt)}
+.scan-status.success{background:var(--ok-bg);color:var(--ok-txt)}
+.scan-status.error{background:var(--red-bg);color:var(--red-txt)}
+.spinner{width:18px;height:18px;border:2px solid rgba(24,95,165,0.3);border-top-color:var(--info-txt);border-radius:50%;animation:spin 0.7s linear infinite;flex-shrink:0}
+@keyframes spin{to{transform:rotate(360deg)}}
+.scan-results{background:var(--bg2);border-radius:var(--rl);border:0.5px solid var(--border);overflow:hidden;margin-top:12px}
+.scan-result-header{padding:10px 14px;background:var(--ok-bg);border-bottom:0.5px solid var(--border)}
+.scan-result-title{font-size:13px;font-weight:500;color:var(--ok-txt)}
+.scan-result-body{padding:14px}
+.scan-field{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.scan-field label{font-size:12px;color:var(--txt2);min-width:110px;flex-shrink:0}
+.scan-field input,.scan-field select{flex:1;padding:6px 9px;border:0.5px solid var(--border2);border-radius:var(--r);background:var(--bg);color:var(--txt);font-family:inherit;font-size:13px}
+.scan-items-list{margin-top:8px}
+.scan-item-row{display:flex;align-items:center;gap:6px;padding:7px 0;border-bottom:0.5px solid var(--border)}
+.scan-item-row:last-child{border-bottom:none}
+.scan-item-row input{flex:1;padding:5px 8px;border:0.5px solid var(--border2);border-radius:var(--r);background:var(--bg);color:var(--txt);font-family:inherit;font-size:12px}
+.scan-item-row .price-inp{max-width:80px}
+.scan-create-btns{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.btn-create-bill{padding:8px 16px;background:var(--info-bg);border:0.5px solid rgba(24,95,165,0.3);border-radius:var(--r);cursor:pointer;font-size:12px;font-family:inherit;color:var(--info-txt);font-weight:500}
+.btn-create-bill:hover{background:#d0e8f8}
+.btn-create-prod{padding:8px 16px;background:var(--ok-bg);border:0.5px solid rgba(59,109,17,0.3);border-radius:var(--r);cursor:pointer;font-size:12px;font-family:inherit;color:var(--ok-txt);font-weight:500}
+.btn-create-prod:hover{background:#d6ecb8}
+.api-key-note{font-size:11px;color:var(--txt3);margin-top:8px;line-height:1.5}
+.settings-box{background:var(--bg2);border-radius:var(--rl);border:0.5px solid var(--border);padding:16px;margin-bottom:14px}
+.settings-title{font-size:13px;font-weight:500;margin-bottom:4px}
+.settings-sub{font-size:11px;color:var(--txt2);margin-bottom:10px}
+.key-row{display:flex;gap:8px}
+.key-row input{flex:1;padding:7px 10px;border:0.5px solid var(--border2);border-radius:var(--r);background:var(--bg);color:var(--txt);font-family:inherit;font-size:13px}
+.key-saved{font-size:11px;color:var(--ok-txt);margin-top:5px}
+/* PAYMENTS */
+.month-bar-wrap{margin-bottom:6px}
+.month-bar-row{display:flex;align-items:center;gap:8px;margin-bottom:5px}
+.month-bar-lbl{font-size:12px;color:var(--txt2);min-width:68px;text-align:right;flex-shrink:0}
+.month-bar-track{flex:1;height:20px;background:var(--bg2);border-radius:4px;overflow:hidden;position:relative}
+.month-bar-fill{height:100%;border-radius:4px;background:var(--green);transition:width 0.4s}
+.month-bar-fill.unpaid{background:#BA7517}
+.month-bar-amt{font-size:12px;font-weight:500;min-width:72px;text-align:left}
+.month-bar-badges{display:flex;gap:4px;align-items:center}
+.pay-month-header{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:var(--bg2);border-radius:var(--r);margin-bottom:6px;cursor:pointer}
+.pay-month-title{font-size:13px;font-weight:500}
+.pay-month-total{font-size:13px;font-weight:500;color:var(--green)}
+.pay-month-body{padding:0 4px 8px}
+.pay-legend{display:flex;gap:12px;margin-bottom:10px;flex-wrap:wrap}
+.pay-legend-item{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--txt2)}
+.pay-legend-dot{width:10px;height:10px;border-radius:2px}
+.pay-year-sel{display:flex;align-items:center;gap:6px;margin-bottom:14px}
+.pay-year-sel select{padding:5px 9px;border:0.5px solid var(--border2);border-radius:var(--r);background:var(--bg);color:var(--txt);font-family:inherit;font-size:13px}
+.pay-summary-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px}
+@media(max-width:480px){.pay-summary-grid{grid-template-columns:repeat(2,1fr)}}
+/* INSTALLMENTS */
+.inst-section{background:var(--bg);border:0.5px solid var(--border);border-radius:var(--rl);overflow:hidden;margin-bottom:14px}
+.inst-section-hdr{padding:10px 14px;background:var(--info-bg);border-bottom:0.5px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+.inst-section-title{font-size:13px;font-weight:500;color:var(--info-txt)}
+.inst-card{padding:12px 14px;border-bottom:0.5px solid var(--border)}
+.inst-card:last-child{border-bottom:none}
+.inst-card-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:7px}
+.inst-card-name{font-size:13px;font-weight:500}
+.inst-card-chip{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:20px;background:var(--bg2);border:0.5px solid var(--border2);font-size:11px;color:var(--txt2)}
+.inst-progress-wrap{margin-bottom:6px}
+.inst-progress-track{height:6px;background:var(--bg2);border-radius:3px;overflow:hidden;margin-bottom:3px}
+.inst-progress-fill{height:100%;border-radius:3px;background:var(--green)}
+.inst-progress-lbl{display:flex;justify-content:space-between;font-size:10px;color:var(--txt3)}
+.inst-months{display:flex;gap:3px;flex-wrap:wrap;margin-top:6px}
+.inst-month-dot{width:20px;height:20px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:500;cursor:default}
+.inst-dot-paid{background:var(--ok-bg);color:var(--ok-txt)}
+.inst-dot-current{background:var(--green);color:#fff}
+.inst-dot-future{background:var(--bg2);color:var(--txt3)}
+.inst-dot-overdue{background:var(--red-bg);color:var(--red-txt)}
+.inst-form-box{background:var(--bg2);border-radius:var(--r);padding:12px;border:0.5px solid var(--border);margin-top:10px}
+.inst-toggle{display:flex;align-items:center;gap:8px;padding:9px 0;cursor:pointer;user-select:none}
+.inst-toggle-lbl{font-size:13px;font-weight:500}
+.toggle-sw{width:36px;height:20px;border-radius:10px;background:var(--border2);position:relative;transition:background 0.2s;flex-shrink:0}
+.toggle-sw.on{background:var(--green)}
+.toggle-sw::after{content:'';width:16px;height:16px;border-radius:50%;background:#fff;position:absolute;top:2px;right:2px;transition:right 0.2s}
+.toggle-sw.on::after{right:18px}
+.badge-inst{background:var(--info-bg);color:var(--info-txt);border:0.5px solid rgba(24,95,165,0.2)}
+</style>
+</head>
+<body>
+<div class="app-shell">
+  <div class="app-header">
+    <div class="hdr-left">
+      <div class="hdr-title">
+        <div class="hdr-icon">
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M8 1L1 7.5h2.5V15h4v-5h1v5h4V7.5H15L8 1z" fill="white"/></svg>
+        </div>
+        <div>
+          <div>מנהל הבית של משפחת קוטאי</div>
+          <div style="font-size:10px;font-weight:400;color:var(--txt3);margin-top:1px">© כל הזכויות שמורות לאבידן קוטאי</div>
+        </div>
+      </div>
+    </div>
+    <div class="hdr-right">
+      <span class="hdr-date" id="hdr-date"></span>
+      <button class="btn-settings" onclick="openSettings()" title="הגדרות">⚙</button>
+    </div>
+  </div>
+  <div class="app-tabs" id="app-tabs"></div>
+  <div class="app-body" id="app-body"></div>
+</div>
+
+<!-- Main modal (viewer, settings) -->
+<div class="modal-overlay" id="modal-overlay" style="display:none">
+  <div class="modal-panel" id="modal-panel"></div>
+</div>
+
+<!-- Scan modal -->
+<div class="modal-overlay" id="scan-overlay" style="display:none">
+  <div class="modal-panel" id="scan-panel" style="max-width:620px"></div>
+</div>
+
+<script>
+var DB={products:[],bills:[]};
+var UI={view:'dashboard',editing:null,searchQ:'',searchType:'all',viewer:null,viewerTab:'info',viewerDocs:null,addDocMode:'upload',previewDoc:null};
+
+function loadDB(){try{var p=localStorage.getItem('hm_prod');if(p)DB.products=JSON.parse(p);}catch(e){}try{var b=localStorage.getItem('hm_bills');if(b)DB.bills=JSON.parse(b);}catch(e){}}
+function saveDB(){try{localStorage.setItem('hm_prod',JSON.stringify(DB.products));}catch(e){}try{localStorage.setItem('hm_bills',JSON.stringify(DB.bills));}catch(e){}}
+function loadDocs(id){try{var r=localStorage.getItem('hm_docs_'+id);if(r)return JSON.parse(r);}catch(e){}return[];}
+function saveDocs(id,docs){try{localStorage.setItem('hm_docs_'+id,JSON.stringify(docs));}catch(e){}}
+function getApiKey(){return localStorage.getItem('hm_apikey')||'';}
+function setApiKey(k){localStorage.setItem('hm_apikey',k);}
+
+function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,6);}
+function fmtD(s){if(!s)return'—';var p=s.split('-');return p[2]+'/'+p[1]+'/'+p[0];}
+function fmtSize(b){if(!b)return'';if(b<1024)return b+'B';if(b<1048576)return Math.round(b/1024)+'KB';return(b/1048576).toFixed(1)+'MB';}
+function todayS(){return new Date().toISOString().slice(0,10);}
+function daysUntil(ds){if(!ds)return null;var t=new Date();t.setHours(0,0,0,0);return Math.round((new Date(ds)-t)/86400000);}
+function wStatus(ed){var d=daysUntil(ed);if(d===null)return{cls:'',lbl:'לא הוזן',d:null};if(d<0)return{cls:'exp',lbl:'פגה',d:d};if(d<=30)return{cls:'exp',lbl:d+' ימים',d:d};if(d<=90)return{cls:'warn',lbl:d+' ימים',d:d};return{cls:'ok',lbl:d+' ימים',d:d};}
+function bStatus(b){if(b.isPaid)return{cls:'paid',lbl:'שולם'};var d=daysUntil(b.dueDate);if(d!==null&&d<0)return{cls:'over',lbl:'באיחור'};if(d!==null&&d<=7)return{cls:'due',lbl:d+"י'"};return{cls:'',lbl:''};}
+function docTypeInfo(doc){if(doc.docType==='link')return{cls:'doc-icon-link',icon:'🔗'};if(doc.mimeType&&doc.mimeType.indexOf('image')===0)return{cls:'doc-icon-img',icon:'🖼'};if(doc.mimeType==='application/pdf'||(doc.name&&doc.name.toLowerCase().endsWith('.pdf')))return{cls:'doc-icon-pdf',icon:'📄'};return{cls:'doc-icon-other',icon:'📎'};}
+
+var CATS=[{id:'appliances',l:'מכשירי חשמל'},{id:'electronics',l:'אלקטרוניקה'},{id:'furniture',l:'ריהוט'},{id:'plumbing',l:'אינסטלציה'},{id:'ac',l:'מיזוג אוויר'},{id:'kitchen',l:'מטבח'},{id:'other',l:'אחר'}];
+var DEFAULT_BTYPES=[{id:'electricity',l:'חשמל'},{id:'water',l:'מים'},{id:'gas',l:'גז'},{id:'internet',l:'אינטרנט'},{id:'phone',l:'טלפון'},{id:'arnona',l:'ארנונה'},{id:'vaad',l:'ועד בית'},{id:'insurance',l:'ביטוח'},{id:'other',l:'אחר'}];
+var BTYPES=DEFAULT_BTYPES.slice();
+function loadBtypes(){try{var r=localStorage.getItem('hm_btypes');if(r)BTYPES=JSON.parse(r);}catch(e){}}
+function saveBtypes(){try{localStorage.setItem('hm_btypes',JSON.stringify(BTYPES));}catch(e){}}
+loadBtypes();
+function catL(id){for(var i=0;i<CATS.length;i++)if(CATS[i].id===id)return CATS[i].l;return id||'אחר';}
+function btL(id){for(var i=0;i<BTYPES.length;i++)if(BTYPES[i].id===id)return BTYPES[i].l;return id||'';}
+
+function h(tag,attrs){
+  var e=document.createElement(tag);
+  if(attrs)Object.keys(attrs).forEach(function(k){var v=attrs[k];if(k==='class')e.className=v;else if(k==='onClick')e.addEventListener('click',v);else if(k==='onInput')e.addEventListener('input',v);else if(k==='style'&&typeof v==='object')Object.keys(v).forEach(function(sk){e.style[sk]=v[sk];});else if(k==='checked')e.checked=v;else if(k==='value')e.value=v;else if(k==='selected')e.selected=v;else e.setAttribute(k,v);});
+  for(var a=2;a<arguments.length;a++){var ch=arguments[a];if(ch==null||ch===false)continue;if(Array.isArray(ch))ch.forEach(function(c){if(c!=null&&c!==false)e.appendChild(typeof c==='string'?document.createTextNode(c):c);});else e.appendChild(typeof ch==='string'?document.createTextNode(ch):ch);}
+  return e;
+}
+
+/* ====================== SETTINGS ====================== */
+function openSettings(){
+  var panel=document.getElementById('modal-panel');panel.innerHTML='';
+  panel.appendChild(h('div',{class:'modal-header'},h('div',{class:'modal-title'},'⚙ הגדרות'),h('button',{class:'btn-sm',onClick:closeModal},'✕ סגור')));
+  var body=h('div',{class:'modal-body'});
+
+  // API Key section
+  var keyVal=getApiKey();
+  var keyInp=h('input',{type:'password',value:keyVal,placeholder:'sk-ant-...'});
+  var saved=h('div',{class:'key-saved',style:{display:keyVal?'block':'none'}},'✓ מפתח שמור');
+  body.appendChild(h('div',{class:'settings-box'},
+    h('div',{class:'settings-title'},'🔑 מפתח Anthropic API'),
+    h('div',{class:'settings-sub'},'נדרש לסריקת חשבוניות וקבלות. המפתח נשמר רק במחשב שלך.'),
+    h('div',{class:'key-row'},keyInp,
+      h('button',{class:'btn-primary',style:{fontSize:'12px',padding:'6px 14px'},onClick:function(){
+        var k=keyInp.value.trim();if(!k){alert('נא להזין מפתח תקין');return;}
+        setApiKey(k);saved.style.display='block';
+      }},'שמור')
+    ),
+    saved,
+    h('div',{class:'api-key-note'},'קבל מפתח API בכתובת: console.anthropic.com → API Keys')
+  ));
+
+  // Bill types editor
+  var btBox=h('div',{class:'settings-box'});
+  btBox.appendChild(h('div',{class:'settings-title'},'🏷 סוגי חשבונות'));
+  btBox.appendChild(h('div',{class:'settings-sub'},'ערוך, הוסף או מחק סוגי חשבונות'));
+
+  var listEl=h('div',{id:'btypes-list'});
+  body.appendChild(btBox);
+
+  function renderBtypesList(){
+    listEl.innerHTML='';
+    BTYPES.forEach(function(t,idx){
+      var nameInp=h('input',{type:'text',value:t.l,style:{flex:'1',padding:'5px 8px',border:'0.5px solid var(--border2)',borderRadius:'var(--r)',background:'var(--bg)',color:'var(--txt)',fontFamily:'inherit',fontSize:'13px'}});
+      nameInp.addEventListener('change',function(){
+        BTYPES[idx]=Object.assign({},BTYPES[idx],{l:nameInp.value.trim()||BTYPES[idx].l});
+        saveBtypes();
+      });
+      var isDefault=DEFAULT_BTYPES.some(function(d){return d.id===t.id;});
+      listEl.appendChild(h('div',{style:{display:'flex',alignItems:'center',gap:'6px',marginBottom:'6px'}},
+        nameInp,
+        !isDefault?h('button',{class:'btn-sm btn-del',style:{flexShrink:'0'},onClick:function(){
+          BTYPES.splice(idx,1);saveBtypes();renderBtypesList();
+        }},'✕'):h('span',{style:{fontSize:'10px',color:'var(--txt3)',minWidth:'28px',textAlign:'center'}},'ברירת מחדל')
+      ));
+    });
+    // Add new type row
+    var newInp=h('input',{type:'text',placeholder:'+ הוסף סוג חדש...',style:{width:'100%',padding:'6px 9px',border:'1px dashed var(--border2)',borderRadius:'var(--r)',background:'transparent',color:'var(--txt)',fontFamily:'inherit',fontSize:'13px'}});
+    newInp.addEventListener('keydown',function(e){
+      if(e.key==='Enter'&&newInp.value.trim()){
+        var lbl=newInp.value.trim();
+        var newId='custom_'+uid();
+        BTYPES.push({id:newId,l:lbl});
+        saveBtypes();renderBtypesList();
+      }
+    });
+    listEl.appendChild(newInp);
+  }
+
+  renderBtypesList();
+  btBox.appendChild(listEl);
+  btBox.appendChild(h('div',{style:{fontSize:'10px',color:'var(--txt3)',marginTop:'8px'}},'לחץ Enter להוספת סוג חדש · ניתן לערוך ברירות מחדל'));
+
+  // Admin section
+  var adminBox=h('div',{class:'settings-box',style:{borderColor:'rgba(163,45,45,0.3)'}});
+  adminBox.appendChild(h('div',{class:'settings-title'},'🔧 מנהל מערכת'));
+  adminBox.appendChild(h('div',{class:'settings-sub'},'פעולות אדמין — שים לב: פעולות אלו אינן הפיכות'));
+
+  var confirmEl=h('div',{style:{display:'none',background:'var(--red-bg)',border:'0.5px solid rgba(163,45,45,0.3)',borderRadius:'var(--r)',padding:'12px',marginTop:'10px'}});
+  confirmEl.appendChild(h('div',{style:{fontSize:'13px',fontWeight:'500',color:'var(--red-txt)',marginBottom:'8px'}},'⚠ האם אתה בטוח?'));
+  confirmEl.appendChild(h('div',{style:{fontSize:'12px',color:'var(--red-txt)',marginBottom:'10px'}},'פעולה זו תמחק את כל המוצרים, החשבונות, המסמכים וסוגי החשבונות. לא ניתן לשחזר!'));
+  confirmEl.appendChild(h('div',{style:{display:'flex',gap:'8px'}},
+    h('button',{class:'btn-primary',style:{background:'#A32D2D',fontSize:'12px',padding:'6px 14px'},onClick:function(){
+      // Delete all data from localStorage
+      var keysToRemove=[];
+      for(var i=0;i<localStorage.length;i++){
+        var k=localStorage.key(i);
+        if(k&&k.indexOf('hm_')===0)keysToRemove.push(k);
+      }
+      // Also remove document keys
+      for(var i=0;i<localStorage.length;i++){
+        var k=localStorage.key(i);
+        if(k&&k.indexOf('docs_')===0)keysToRemove.push(k);
+      }
+      keysToRemove.forEach(function(k){localStorage.removeItem(k);});
+      DB.products=[];DB.bills=[];
+      loadBtypes();
+      closeModal();
+      UI.view='dashboard';
+      render();
+      showToast('כל הנתונים נמחקו בהצלחה');
+    }},'כן, מחק הכל'),
+    h('button',{class:'btn-cancel',style:{fontSize:'12px'},onClick:function(){confirmEl.style.display='none';}},'ביטול')
+  ));
+
+  adminBox.appendChild(h('button',{
+    style:{padding:'7px 16px',background:'transparent',border:'0.5px solid rgba(163,45,45,0.5)',borderRadius:'var(--r)',cursor:'pointer',fontSize:'12px',fontFamily:'inherit',color:'var(--red-txt)',marginTop:'6px'},
+    onClick:function(){confirmEl.style.display=confirmEl.style.display==='none'?'block':'none';}
+  },'🗑 אפס את כל הנתונים'));
+  adminBox.appendChild(confirmEl);
+  body.appendChild(adminBox);
+
+  panel.appendChild(body);
+  document.getElementById('modal-overlay').style.display='flex';
+}
+
+/* ====================== SCAN ====================== */
+var scanState={imgData:null,imgMime:null,scanning:false,result:null};
+
+function openScan(){
+  scanState={imgData:null,imgMime:null,scanning:false,result:null};
+  buildScanModal();
+  document.getElementById('scan-overlay').style.display='flex';
+}
+function closeScan(){document.getElementById('scan-overlay').style.display='none';}
+document.getElementById('scan-overlay').addEventListener('click',function(e){if(e.target===this)closeScan();});
+
+function buildScanModal(){
+  var panel=document.getElementById('scan-panel');panel.innerHTML='';
+  panel.appendChild(h('div',{class:'modal-header'},
+    h('div',{class:'modal-title'},'📷 סריקת חשבונית / קבלה'),
+    h('button',{class:'btn-sm',onClick:closeScan},'✕ סגור')
+  ));
+  var body=h('div',{class:'modal-body',id:'scan-body'});
+  panel.appendChild(body);
+  buildScanBody(body);
+}
+
+function buildScanBody(body){
+  body.innerHTML='';
+  if(!getApiKey()){
+    body.appendChild(h('div',{class:'scan-status error'},
+      '⚠',h('div',{},'נדרש מפתח Anthropic API. ',h('a',{href:'#',onClick:function(e){e.preventDefault();closeScan();openSettings();}},h('b',{},'הגדר כאן')))
+    ));
+    return;
+  }
+  var fileInp=h('input',{type:'file',style:{display:'none'},accept:'image/*,.pdf'});
+  var previewEl=h('div',{style:{textAlign:'center',marginTop:'12px',display:'none'}});
+  var zone=h('div',{class:'scan-drop-zone',onClick:function(){fileInp.click();}},
+    h('div',{class:'scan-drop-icon'},'📄'),
+    h('div',{class:'scan-drop-title'},'צלם או גרור חשבונית / קבלה'),
+    h('div',{class:'scan-drop-sub'},'תמונות (JPG, PNG, HEIC) · PDF · עד 5MB')
+  );
+  zone.addEventListener('dragover',function(e){e.preventDefault();zone.classList.add('drag');});
+  zone.addEventListener('dragleave',function(){zone.classList.remove('drag');});
+  zone.addEventListener('drop',function(e){e.preventDefault();zone.classList.remove('drag');var f=e.dataTransfer.files[0];if(f)handleScanFile(f,previewEl,statusEl,resultsEl);});
+  var statusEl=h('div',{id:'scan-status-el'});
+  var resultsEl=h('div',{id:'scan-results-el'});
+  body.appendChild(fileInp);body.appendChild(zone);body.appendChild(previewEl);body.appendChild(statusEl);body.appendChild(resultsEl);
+  fileInp.addEventListener('change',function(){var f=fileInp.files[0];if(f)handleScanFile(f,previewEl,statusEl,resultsEl);});
+}
+
+var ALLOWED_IMG_MIME=['image/jpeg','image/png','image/gif','image/webp'];
+
+function handleScanFile(file,previewEl,statusEl,resultsEl){
+  if(file.size>5*1024*1024){statusEl.innerHTML='';statusEl.appendChild(h('div',{class:'scan-status error'},'⚠ הקובץ גדול מדי (מקסימום 5MB)'));return;}
+  statusEl.innerHTML='';
+  statusEl.appendChild(h('div',{class:'scan-status loading'},h('div',{class:'spinner'}),'טוען קובץ...'));
+  var isPdf=(file.type==='application/pdf')||file.name.toLowerCase().endsWith('.pdf');
+  var reader=new FileReader();
+  reader.onload=function(ev){
+    var dataUrl=ev.target.result;
+    var base64=dataUrl.split(',')[1];
+    if(isPdf){
+      // PDF: show icon preview, send as document type
+      scanState.imgData=base64;scanState.imgMime='application/pdf';
+      previewEl.innerHTML='';
+      previewEl.appendChild(h('div',{style:{textAlign:'center',padding:'18px',background:'var(--bg2)',borderRadius:'var(--r)',fontSize:'13px',color:'var(--txt2)'}},'📄 '+file.name));
+      previewEl.style.display='block';
+      startScanOCR(base64,'application/pdf',statusEl,resultsEl);
+    } else {
+      var rawMime=file.type||'image/jpeg';
+      if(ALLOWED_IMG_MIME.indexOf(rawMime)>=0){
+        // Supported image type — send directly
+        scanState.imgData=base64;scanState.imgMime=rawMime;
+        showScanPreview(dataUrl,previewEl);
+        startScanOCR(base64,rawMime,statusEl,resultsEl);
+      } else {
+        // Unsupported image (HEIC etc.) — convert via canvas
+        var img=new Image();
+        img.onload=function(){
+          var canvas=document.createElement('canvas');
+          canvas.width=img.naturalWidth;canvas.height=img.naturalHeight;
+          canvas.getContext('2d').drawImage(img,0,0);
+          var jpegUrl=canvas.toDataURL('image/jpeg',0.92);
+          var b64j=jpegUrl.split(',')[1];
+          scanState.imgData=b64j;scanState.imgMime='image/jpeg';
+          showScanPreview(jpegUrl,previewEl);
+          startScanOCR(b64j,'image/jpeg',statusEl,resultsEl);
+        };
+        img.onerror=function(){statusEl.innerHTML='';statusEl.appendChild(h('div',{class:'scan-status error'},'⚠ פורמט לא נתמך. השתמש ב-JPG, PNG, WebP או PDF.'));};
+        img.src=dataUrl;
+      }
+    }
+  };
+  reader.readAsDataURL(file);
+}
+
+function showScanPreview(dataUrl,previewEl){
+  previewEl.innerHTML='';
+  previewEl.appendChild(h('img',{src:dataUrl,class:'scan-preview-img'}));
+  previewEl.style.display='block';
+}
+
+function startScanOCR(base64,mime,statusEl,resultsEl){
+  statusEl.innerHTML='';
+  statusEl.appendChild(h('div',{class:'scan-status loading'},h('div',{class:'spinner'}),'מנתח את המסמך עם AI...'));
+  resultsEl.innerHTML='';
+  callClaudeOCR(base64,mime,statusEl,resultsEl);
+}
+
+async function callClaudeOCR(base64,mime,statusEl,resultsEl){
+  var apiKey=getApiKey();
+  var prompt='אתה מנתח חשבוניות וקבלות עבור מערכת ניהול בית.\nנתח את המסמך שצורף והחזר JSON בלבד (ללא backticks, ללא הסברים) בפורמט הבא:\n{\n  "docType": "receipt|invoice|warranty|utility_bill|other",\n  "storeName": "שם החנות/ספק",\n  "date": "YYYY-MM-DD או null",\n  "totalAmount": מספר או null,\n  "currency": "ILS|USD|EUR",\n  "description": "תיאור קצר של המסמך",\n  "utilityType": "electricity|water|gas|internet|phone|arnona|vaad|insurance|other|null",\n  "items": [\n    {\n      "name": "שם המוצר",\n      "model": "דגם או null",\n      "price": מספר או null,\n      "warrantyYears": מספר או null\n    }\n  ]\n}\nהחזר ONLY valid JSON.';
+  try{
+    // Build content block based on file type
+    var contentBlock;
+    if(mime==='application/pdf'){
+      contentBlock={type:'document',source:{type:'base64',media_type:'application/pdf',data:base64}};
+    } else {
+      contentBlock={type:'image',source:{type:'base64',media_type:mime,data:base64}};
+    }
+    var body={
+      model:'claude-opus-4-5',
+      max_tokens:1024,
+      messages:[{role:'user',content:[contentBlock,{type:'text',text:prompt}]}]
+    };
+    var res=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+      body:JSON.stringify(body)
+    });
+    if(!res.ok){var err=await res.json();throw new Error(err.error&&err.error.message||'שגיאת API: '+res.status);}
+    var data=await res.json();
+    var text=data.content.map(function(c){return c.text||'';}).join('');
+    var clean=text.replace(/```json|```/g,'').trim();
+    var parsed=JSON.parse(clean);
+    statusEl.innerHTML='';
+    statusEl.appendChild(h('div',{class:'scan-status success'},'✓ המסמך נסרק בהצלחה!'));
+    renderScanResults(parsed,resultsEl,base64,mime);
+  }catch(err){
+    statusEl.innerHTML='';
+    statusEl.appendChild(h('div',{class:'scan-status error'},'⚠ '+err.message));
+  }
+}
+
+function renderScanResults(data,el,imgBase64,imgMime){
+  el.innerHTML='';
+  var docTypeLbl={receipt:'קבלה',invoice:'חשבונית',warranty:'תעודת אחריות',utility_bill:'חשבון שירות',other:'מסמך'}[data.docType]||'מסמך';
+
+  var box=h('div',{class:'scan-results'});
+  box.appendChild(h('div',{class:'scan-result-header'},h('div',{class:'scan-result-title'},'📋 '+docTypeLbl+' — '+( data.storeName||''))));
+  var body2=h('div',{class:'scan-result-body'});
+
+  // Editable fields
+  var storeInp=h('input',{type:'text',value:data.storeName||''});
+  var dateInp=h('input',{type:'date',value:data.date||todayS()});
+  var amtInp=h('input',{type:'number',value:data.totalAmount||''});
+  var descInp=h('input',{type:'text',value:data.description||''});
+
+  body2.appendChild(h('div',{class:'scan-field'},h('label',{},'ספק / חנות'),storeInp));
+  body2.appendChild(h('div',{class:'scan-field'},h('label',{},'תאריך'),dateInp));
+  body2.appendChild(h('div',{class:'scan-field'},h('label',{},'סכום כולל (₪)'),amtInp));
+  body2.appendChild(h('div',{class:'scan-field'},h('label',{},'תיאור'),descInp));
+
+  // Items table
+  var itemRows=[];
+  if(data.items&&data.items.length){
+    body2.appendChild(h('div',{style:{fontSize:'12px',fontWeight:'500',margin:'10px 0 6px'}},'פריטים:'));
+    var itemsList=h('div',{class:'scan-items-list'});
+    data.items.forEach(function(item,i){
+      var nInp=h('input',{type:'text',value:item.name||'',placeholder:'שם מוצר'});
+      var mInp=h('input',{type:'text',value:item.model||'',placeholder:'דגם'});
+      var pInp=h('input',{type:'number',class:'price-inp',value:item.price||'',placeholder:'₪'});
+      var wInp=h('input',{type:'number',class:'price-inp',value:item.warrantyYears||'',placeholder:'שנות אחריות'});
+      itemRows.push({name:nInp,model:mInp,price:pInp,warranty:wInp});
+      itemsList.appendChild(h('div',{class:'scan-item-row'},nInp,mInp,pInp,wInp));
+    });
+    body2.appendChild(itemsList);
+  }
+
+  // Action buttons
+  var btns=h('div',{class:'scan-create-btns'});
+
+  // Create bill button
+  var utilSel=h('select',{style:{display:'none'}});
+  BTYPES.forEach(function(t){var o=h('option',{value:t.id},t.l);if(t.id===(data.utilityType||'other'))o.selected=true;utilSel.appendChild(o);});
+  btns.appendChild(h('button',{class:'btn-create-bill',onClick:function(){
+    var bill={id:uid(),createdAt:new Date().toISOString(),type:data.utilityType||'other',description:storeInp.value.trim()||descInp.value.trim(),amount:parseFloat(amtInp.value)||0,dueDate:dateInp.value,period:'',isPaid:true,notes:'סרוק אוטומטית'};
+    DB.bills.push(bill);
+    // Also attach the scanned image as a document
+    if(imgBase64){var doc={id:uid(),name:'חשבונית סרוקה — '+(storeInp.value||fmtD(dateInp.value)),docType:'file',mimeType:imgMime,data:'data:'+imgMime+';base64,'+imgBase64,addedAt:new Date().toISOString()};saveDocs(bill.id,[doc]);}
+    saveDB();closeScan();UI.view='bills';render();
+    showToast('חשבון נוצר בהצלחה!');
+  }},'+ צור חשבון שירות'));
+
+  // Create product button
+  if(data.items&&data.items.length){
+    btns.appendChild(h('button',{class:'btn-create-prod',onClick:function(){
+      itemRows.forEach(function(r){
+        if(!r.name.value.trim())return;
+        var pd=dateInp.value;var we='';
+        if(r.warranty.value){var d=new Date(pd||todayS());d.setFullYear(d.getFullYear()+parseInt(r.warranty.value));we=d.toISOString().slice(0,10);}
+        var prod={id:uid(),createdAt:new Date().toISOString(),name:r.name.value.trim(),model:r.model.value.trim(),manufacturer:'',serialNumber:'',category:'other',store:storeInp.value.trim(),price:parseFloat(r.price.value)||0,purchaseDate:pd,warrantyEnd:we,notes:'סרוק אוטומטית'};
+        // Attach image
+        if(imgBase64){var doc={id:uid(),name:'קבלת רכישה — '+prod.name,docType:'file',mimeType:imgMime,data:'data:'+imgMime+';base64,'+imgBase64,addedAt:new Date().toISOString()};saveDocs(prod.id,[doc]);}
+        DB.products.push(prod);
+      });
+      saveDB();closeScan();UI.view='products';render();
+      showToast('מוצרים נוספו בהצלחה!');
+    }},'+ צור מוצרים'));
+  } else {
+    btns.appendChild(h('button',{class:'btn-create-prod',onClick:function(){
+      var prod={id:uid(),createdAt:new Date().toISOString(),name:descInp.value.trim()||storeInp.value.trim()||'מוצר חדש',model:'',manufacturer:'',serialNumber:'',category:'other',store:storeInp.value.trim(),price:parseFloat(amtInp.value)||0,purchaseDate:dateInp.value,warrantyEnd:'',notes:'סרוק אוטומטית'};
+      if(imgBase64){var doc={id:uid(),name:'קבלת רכישה',docType:'file',mimeType:imgMime,data:'data:'+imgMime+';base64,'+imgBase64,addedAt:new Date().toISOString()};saveDocs(prod.id,[doc]);}
+      DB.products.push(prod);saveDB();closeScan();UI.view='products';render();
+      showToast('מוצר נוסף בהצלחה!');
+    }},'+ צור מוצר'));
+  }
+  body2.appendChild(btns);
+  body2.appendChild(h('div',{style:{fontSize:'11px',color:'var(--txt3)',marginTop:'8px'}},'הנתונים נוצרו אוטומטית — ניתן לערוך לפני שמירה'));
+  box.appendChild(body2);
+  el.appendChild(box);
+}
+
+/* ====================== TOAST ====================== */
+function showToast(msg){
+  var t=document.createElement('div');
+  t.textContent=msg;
+  Object.assign(t.style,{position:'fixed',bottom:'24px',left:'50%',transform:'translateX(-50%)',background:'#1D9E75',color:'#fff',padding:'10px 20px',borderRadius:'8px',fontSize:'13px',fontWeight:'500',zIndex:'9999',opacity:'0',transition:'opacity 0.2s'});
+  document.body.appendChild(t);
+  setTimeout(function(){t.style.opacity='1';},10);
+  setTimeout(function(){t.style.opacity='0';setTimeout(function(){t.remove();},300);},2500);
+}
+
+/* ====================== RENDER ====================== */
+function render(){
+  var d=new Date();document.getElementById('hdr-date').textContent=d.getDate()+'/'+(d.getMonth()+1)+'/'+d.getFullYear();
+  var TABS=[['dashboard','לוח בקרה'],['products','מוצרים'],['bills','חשבונות'],['payments','תשלומים'],['search','חיפוש']];
+  var tabsEl=document.getElementById('app-tabs');tabsEl.innerHTML='';
+  TABS.forEach(function(t){tabsEl.appendChild(h('button',{class:'tab'+(UI.view===t[0]?' on':''),onClick:(function(v){return function(){UI.view=v;renderBody();};})(t[0])},t[1]));});
+  renderBody();
+}
+function renderBody(){
+  if(UI.view==='add_product'||UI.view==='edit_product'){document.getElementById('app-body').innerHTML='';document.getElementById('app-body').appendChild(buildProductForm());return;}
+  if(UI.view==='add_bill'||UI.view==='edit_bill'){document.getElementById('app-body').innerHTML='';document.getElementById('app-body').appendChild(buildBillForm());return;}
+  var el=document.createElement('div');
+  if(UI.view==='dashboard')buildDashboard(el);else if(UI.view==='products')buildProducts(el);else if(UI.view==='bills')buildBills(el);else if(UI.view==='payments')buildPayments(el);else if(UI.view==='search')buildSearch(el);
+  document.getElementById('app-body').innerHTML='';document.getElementById('app-body').appendChild(el);
+  document.querySelectorAll('.tab').forEach(function(t,i){t.className='tab'+((['dashboard','products','bills','payments','search'][i]===UI.view)?' on':'');});
+}
+
+/* ====================== VIEWER ====================== */
+function openViewer(item,kind){UI.viewer={item:item,kind:kind};UI.viewerTab='info';UI.viewerDocs=loadDocs(item.id);UI.previewDoc=null;UI.addDocMode='upload';buildViewerModal();document.getElementById('modal-overlay').style.display='flex';}
+function closeModal(){document.getElementById('modal-overlay').style.display='none';UI.viewer=null;}
+document.getElementById('modal-overlay').addEventListener('click',function(e){if(e.target===this)closeModal();});
+function buildViewerModal(){
+  var item=UI.viewer.item,kind=UI.viewer.kind;
+  var name=kind==='product'?item.name:(btL(item.type)+(item.description?' · '+item.description:''));
+  var panel=document.getElementById('modal-panel');panel.innerHTML='';
+  panel.appendChild(h('div',{class:'modal-header'},h('div',{class:'modal-title'},name),h('button',{class:'btn-sm',onClick:closeModal},'✕ סגור')));
+  panel.appendChild(h('div',{class:'modal-tabs'},
+    h('button',{class:'vtab'+(UI.viewerTab==='info'?' on':''),onClick:function(){UI.viewerTab='info';buildModalBody(bodyEl);}},'פרטים'),
+    h('button',{class:'vtab'+(UI.viewerTab==='docs'?' on':''),onClick:function(){UI.viewerTab='docs';buildModalBody(bodyEl);}},'מסמכים'+(UI.viewerDocs&&UI.viewerDocs.length?' ('+UI.viewerDocs.length+')':''))
+  ));
+  var bodyEl=h('div',{class:'modal-body'});panel.appendChild(bodyEl);buildModalBody(bodyEl);
+}
+function buildModalBody(el){el.innerHTML='';if(UI.viewerTab==='info')buildViewerInfo(el);else buildViewerDocs(el);}
+function buildViewerInfo(el){
+  var item=UI.viewer.item,kind=UI.viewer.kind;
+  var fields=kind==='product'
+    ?[['שם מוצר',item.name],['דגם',item.model||'—'],['יצרן',item.manufacturer||'—'],['מספר סריאלי',item.serialNumber||'—'],['קטגוריה',catL(item.category)],['חנות',item.store||'—'],['מחיר','₪'+(item.price||0)],['תאריך רכישה',fmtD(item.purchaseDate)],['אחריות עד',fmtD(item.warrantyEnd)],['סטטוס',wStatus(item.warrantyEnd).lbl]]
+    :[['סוג',btL(item.type)],['תיאור',item.description||'—'],['סכום','₪'+item.amount.toLocaleString()],['תאריך לתשלום',fmtD(item.dueDate)],['תקופה',item.period||'—'],['סטטוס',item.isPaid?'שולם':bStatus(item).lbl||'ממתין']];
+  var grid=h('div',{class:'detail-grid'});fields.forEach(function(f){grid.appendChild(h('div',{class:'detail-field'},h('div',{class:'detail-lbl'},f[0]),h('div',{class:'detail-val'},f[1]||'—')));});el.appendChild(grid);
+  if(kind==='product'){var ws=wStatus(item.warrantyEnd);if(ws.cls&&item.purchaseDate&&item.warrantyEnd&&ws.d!==null){var tm=new Date(item.warrantyEnd)-new Date(item.purchaseDate),em=new Date()-new Date(item.purchaseDate);var pct=Math.max(0,Math.min(100,Math.round(em/tm*100)));var fc=ws.cls==='ok'?'#1D9E75':ws.cls==='warn'?'#BA7517':'#E24B4A';el.appendChild(h('div',{style:{marginBottom:'14px'}},h('div',{style:{fontSize:'11px',color:'var(--txt2)',marginBottom:'5px'}},'ניצול אחריות: '+pct+'%'),h('div',{class:'wbar',style:{height:'6px'}},h('div',{class:'wfill',style:{width:pct+'%',background:fc}}))));}if(item.notes)el.appendChild(h('div',{class:'detail-field'},h('div',{class:'detail-lbl'},'הערות'),h('div',{class:'detail-val',style:{fontStyle:'italic',fontWeight:'400'}},item.notes)));}
+  else if(item.notes)el.appendChild(h('div',{class:'detail-field'},h('div',{class:'detail-lbl'},'הערות'),h('div',{class:'detail-val',style:{fontStyle:'italic',fontWeight:'400'}},item.notes)));
+  el.appendChild(h('div',{style:{marginTop:'14px'}},h('button',{class:'btn-sm btn-doc',onClick:function(){UI.viewerTab='docs';buildViewerModal();}},'📎 מסמכים')));
+}
+function buildViewerDocs(el){
+  var listEl=h('div',{});el.appendChild(listEl);renderDocList(listEl);
+  el.appendChild(h('hr',{class:'divider'}));
+  el.appendChild(h('div',{style:{fontSize:'13px',fontWeight:'500',marginBottom:'10px'}},'הוסף מסמך'));
+  var addEl=h('div',{class:'add-doc-form'});el.appendChild(addEl);buildAddDocForm(addEl,listEl);
+}
+function renderDocList(el){
+  el.innerHTML='';var docs=UI.viewerDocs||[];
+  if(!docs.length){el.appendChild(h('div',{style:{fontSize:'12px',color:'var(--txt2)',padding:'6px 0'}},'אין מסמכים מצורפים.'));return;}
+  var list=h('div',{class:'doc-list'});
+  docs.forEach(function(doc,idx){var ti=docTypeInfo(doc);list.appendChild(h('div',{class:'doc-item'},h('div',{class:'doc-icon '+ti.cls},ti.icon),h('div',{class:'doc-info'},h('div',{class:'doc-name'},doc.name),h('div',{class:'doc-meta'},(doc.addedAt?new Date(doc.addedAt).toLocaleDateString('he-IL'):'')+' '+fmtSize(doc.size))),h('div',{class:'doc-actions'},h('button',{class:'btn-sm btn-doc',onClick:(function(d){return function(){UI.previewDoc=d;showDocPreview(el);};})(doc)},ti.cls==='doc-icon-link'?'פתח':'צפה'),h('button',{class:'btn-sm btn-del',onClick:(function(i){return function(){UI.viewerDocs.splice(i,1);saveDocs(UI.viewer.item.id,UI.viewerDocs);renderDocList(el);};})(idx)},'מחק'))));});
+  el.appendChild(list);
+}
+function b64toBlob(b64,mime){var binary=atob(b64);var bytes=new Uint8Array(binary.length);for(var i=0;i<binary.length;i++)bytes[i]=binary.charCodeAt(i);return new Blob([bytes],{type:mime||'application/octet-stream'});}
+function showDocPreview(listEl){
+  var ex=document.getElementById('doc-preview-area');if(ex)ex.remove();
+  var doc=UI.previewDoc;if(!doc)return;
+  var ti=docTypeInfo(doc);
+  var c=h('div',{class:'doc-preview',id:'doc-preview-area'});
+  if(ti.cls==='doc-icon-link'){
+    c.appendChild(h('div',{class:'doc-preview-url'},h('div',{style:{fontSize:'12px',color:'var(--txt2)',marginBottom:'8px'}},'קישור:'),h('a',{href:doc.url,target:'_blank',style:{fontSize:'13px',color:'var(--info-txt)',wordBreak:'break-all'}},doc.url)));
+  } else if(ti.cls==='doc-icon-img'){
+    c.appendChild(h('img',{src:doc.data,alt:doc.name}));
+  } else if(ti.cls==='doc-icon-pdf'){
+    try{
+      var raw=doc.data;var b64=raw.indexOf(',')>=0?raw.split(',')[1]:raw;
+      var blob=b64toBlob(b64,'application/pdf');
+      var blobUrl=URL.createObjectURL(blob);
+      c.appendChild(h('iframe',{src:blobUrl,title:doc.name}));
+    }catch(e){
+      c.appendChild(h('div',{class:'doc-preview-url'},h('div',{style:{fontSize:'12px',color:'var(--txt2)',marginBottom:'6px'}},'לחץ להורדה:'),h('a',{href:doc.data,download:doc.name,style:{fontSize:'13px',color:'var(--info-txt)'}},'הורד PDF')));
+    }
+  } else if(doc.data){
+    c.appendChild(h('div',{class:'doc-preview-url'},h('div',{style:{fontSize:'12px',color:'var(--txt2)',marginBottom:'6px'}},'קובץ: '+doc.name),h('a',{href:doc.data,download:doc.name,style:{fontSize:'13px',color:'var(--info-txt)'}},'הורד קובץ')));
+  }
+  listEl.after(c);
+}
+function buildAddDocForm(el,listEl){
+  var mode=UI.addDocMode;
+  el.appendChild(h('div',{class:'add-doc-tabs'},h('button',{class:'adtab'+(mode==='upload'?' on':''),onClick:function(){UI.addDocMode='upload';el.innerHTML='';buildAddDocForm(el,listEl);}},'העלאת קובץ'),h('button',{class:'adtab'+(mode==='link'?' on':''),onClick:function(){UI.addDocMode='link';el.innerHTML='';buildAddDocForm(el,listEl);}},'קישור URL')));
+  if(mode==='upload'){
+    var fi=h('input',{type:'file',style:{display:'none'},accept:'image/*,application/pdf,.pdf,.doc,.docx,.xls,.xlsx,.txt'});
+    var zl=h('div',{style:{fontSize:'13px',color:'var(--txt2)'}},'לחץ או גרור קובץ לכאן');var zs=h('div',{style:{fontSize:'11px',color:'var(--txt3)',marginTop:'4px'}},'תמונות, PDF, Word, Excel — עד 4MB');
+    var zone=h('div',{class:'upload-zone',onClick:function(){fi.click();}},zl,zs);
+    var prog=h('div',{style:{fontSize:'11px',color:'var(--txt2)',marginTop:'5px',minHeight:'16px'}});
+    var ni=h('input',{type:'text',placeholder:'שם המסמך (רשות)',style:{width:'100%',marginTop:'8px',padding:'7px 10px',border:'0.5px solid var(--border2)',borderRadius:'var(--r)',background:'var(--bg)',color:'var(--txt)',fontFamily:'inherit',fontSize:'12px'}});
+    var ba=h('button',{class:'btn-primary',style:{marginTop:'10px',fontSize:'12px',padding:'6px 14px',opacity:'0.45',pointerEvents:'none'}},'הוסף מסמך');
+    el.appendChild(fi);el.appendChild(zone);el.appendChild(prog);el.appendChild(ni);el.appendChild(ba);
+    var fd=null;
+    fi.addEventListener('change',function(){var f=fi.files[0];if(!f)return;if(f.size>4*1024*1024){prog.textContent='הקובץ גדול מדי';return;}prog.textContent='קורא...';var r=new FileReader();r.onload=function(ev){fd={name:f.name,mimeType:f.type,size:f.size,data:ev.target.result};zl.textContent=f.name;zs.textContent=fmtSize(f.size);prog.textContent='';ba.style.opacity='1';ba.style.pointerEvents='auto';};r.readAsDataURL(f);});
+    ba.addEventListener('click',function(){if(!fd)return;var doc={id:uid(),name:ni.value.trim()||fd.name,docType:'file',mimeType:fd.mimeType,size:fd.size,data:fd.data,addedAt:new Date().toISOString()};if(!UI.viewerDocs)UI.viewerDocs=[];UI.viewerDocs.push(doc);saveDocs(UI.viewer.item.id,UI.viewerDocs);renderDocList(listEl);el.innerHTML='';buildAddDocForm(el,listEl);});
+  }else{
+    var ui=h('input',{type:'url',placeholder:'https://...',style:{width:'100%',padding:'8px 10px',border:'0.5px solid var(--border2)',borderRadius:'var(--r)',background:'var(--bg)',color:'var(--txt)',fontFamily:'inherit',fontSize:'13px'}});
+    var ni2=h('input',{type:'text',placeholder:'שם / תיאור',style:{width:'100%',marginTop:'8px',padding:'8px 10px',border:'0.5px solid var(--border2)',borderRadius:'var(--r)',background:'var(--bg)',color:'var(--txt)',fontFamily:'inherit',fontSize:'13px'}});
+    var eu=h('div',{class:'err'});el.appendChild(ui);el.appendChild(ni2);el.appendChild(eu);
+    el.appendChild(h('button',{class:'btn-primary',style:{marginTop:'10px',fontSize:'12px',padding:'6px 14px'},onClick:function(){if(!ui.value.trim()||ui.value.indexOf('http')<0){eu.textContent='נא להזין URL תקין';return;}var doc={id:uid(),name:ni2.value.trim()||ui.value,docType:'link',url:ui.value.trim(),addedAt:new Date().toISOString()};if(!UI.viewerDocs)UI.viewerDocs=[];UI.viewerDocs.push(doc);saveDocs(UI.viewer.item.id,UI.viewerDocs);renderDocList(listEl);el.innerHTML='';buildAddDocForm(el,listEl);}},'הוסף קישור'));
+  }
+}
+
+/* ====================== PAYMENTS HELPERS ====================== */
+var HEB_MONTHS=['ינואר','פברואר','מרץ','אפריל','מאי','יוני','יולי','אוגוסט','ספטמבר','אוקטובר','נובמבר','דצמבר'];
+function getMonthKey(dateStr){if(!dateStr)return null;return dateStr.slice(0,7);}
+function monthLabel(key){if(!key)return'';var p=key.split('-');return HEB_MONTHS[parseInt(p[1],10)-1]+' '+p[0];}
+function buildMonthlyData(year){
+  var months={};
+  DB.bills.forEach(function(b){
+    var key=getMonthKey(b.dueDate);
+    if(!key)return;
+    if(year&&key.slice(0,4)!==String(year))return;
+    if(!months[key])months[key]={key:key,paid:0,unpaid:0,bills:[]};
+    if(b.isPaid)months[key].paid+=b.amount;
+    else months[key].unpaid+=b.amount;
+    months[key].bills.push(b);
+  });
+  return Object.values(months).sort(function(a,b){return a.key.localeCompare(b.key);});
+}
+function getAvailableYears(){
+  var yrs={};DB.bills.forEach(function(b){if(b.dueDate)yrs[b.dueDate.slice(0,4)]=1;});
+  return Object.keys(yrs).sort().reverse();
+}
+
+/* ====================== PAYMENTS VIEW ====================== */
+function buildPayments(el){
+  var years=getAvailableYears();
+  var curYear=UI.payYear||(years[0]||new Date().getFullYear().toString());
+  UI.payYear=curYear;
+
+  el.appendChild(h('div',{class:'section-hdr'},
+    h('div',{class:'sec-title'},'תשלומים לפי חודשים'),
+    h('button',{class:'btn-add',onClick:function(){UI.editing=null;UI.view='add_bill';renderBody();}},'+ הוסף חשבון')
+  ));
+
+  if(!DB.bills.length){el.appendChild(h('div',{class:'empty'},'אין נתוני תשלומים עדיין.'));return;}
+
+  // ---- INSTALLMENT PLANS SECTION ----
+  var groups=getInstallmentGroups();
+  if(groups.length){
+    var instSec=h('div',{class:'inst-section'});
+    instSec.appendChild(h('div',{class:'inst-section-hdr'},
+      h('div',{class:'inst-section-title'},'💳 תוכניות תשלומים ('+groups.length+')'),
+      h('span',{style:{fontSize:'11px',color:'var(--info-txt)'}},groups.filter(function(g){return g.paidCount<g.totalCount;}).length+' פעילות')
+    ));
+    groups.forEach(function(g){
+      var pct=Math.round(g.paidCount/g.totalCount*100);
+      var remaining=g.totalCount-g.paidCount;
+      var remainAmt=(g.totalCount-g.paidCount)*g.amountPerInst;
+
+      var dots=h('div',{class:'inst-months'});
+      g.bills.forEach(function(b,i){
+        var cls=b.isPaid?'inst-dot-paid':(daysUntil(b.dueDate)<0?'inst-dot-overdue':'inst-dot-future');
+        if(!b.isPaid&&g.bills.filter(function(x){return !x.isPaid;})[0]===b)cls='inst-dot-current';
+        var tip=HEB_MONTHS[new Date(b.dueDate).getMonth()].slice(0,3);
+        dots.appendChild(h('div',{class:'inst-month-dot '+cls,title:fmtD(b.dueDate)+(b.isPaid?' ✓':'')},tip));
+      });
+
+      var card=h('div',{class:'inst-card'});
+      card.appendChild(h('div',{class:'inst-card-top'},
+        h('div',{},
+          h('div',{class:'inst-card-name'},btL(g.type)+(g.bills[0].description?'':'')),
+          h('div',{style:{fontSize:'11px',color:'var(--txt2)',marginTop:'2px'}},(g.bills[0].description||'')+(g.cardLast4?' · ****'+g.cardLast4:''))
+        ),
+        h('div',{style:{textAlign:'left'}},
+          h('div',{style:{fontSize:'12px',fontWeight:'500',color:'var(--info-txt)'}},g.paidCount+'/'+g.totalCount+' שולמו'),
+          remaining>0?h('div',{style:{fontSize:'11px',color:'var(--txt2)',marginTop:'1px'}},'נותר: ₪'+remainAmt.toLocaleString()):h('div',{style:{fontSize:'11px',color:'var(--ok-txt)'},'class':''},'✓ הושלם')
+        )
+      ));
+      card.appendChild(h('div',{class:'inst-progress-wrap'},
+        h('div',{class:'inst-progress-track'},h('div',{class:'inst-progress-fill',style:{width:pct+'%'}})),
+        h('div',{class:'inst-progress-lbl'},h('span',{},'₪'+g.amountPerInst.toLocaleString()+' × '+g.totalCount),h('span',{},'₪'+g.totalAmount.toLocaleString()+' סה"כ'))
+      ));
+      card.appendChild(dots);
+
+      // Next / upcoming payment info
+      if(g.nextUnpaid){
+        var nextDate=g.nextUnpaid.dueDate;
+        var daysLeft=daysUntil(nextDate);
+        var statusTxt=daysLeft===0?'היום':daysLeft>0?'בעוד '+daysLeft+' ימים':'עבר (יחויב אוטומטית)';
+        card.appendChild(h('div',{style:{display:'flex',alignItems:'center',justifyContent:'space-between',marginTop:'8px',paddingTop:'8px',borderTop:'0.5px solid var(--border)'}},
+          h('div',{},
+            h('div',{style:{fontSize:'11px',color:'var(--txt2)'}},'תשלום הבא: '+HEB_MONTHS[new Date(nextDate).getMonth()]+' '+new Date(nextDate).getFullYear()),
+            h('div',{style:{fontSize:'11px',color:daysLeft<0?'var(--warn-txt)':daysLeft<=3?'var(--warn-txt)':'var(--txt3)'}},statusTxt)
+          ),
+          h('div',{class:'badge badge-inst',style:{fontSize:'11px'}},'💳 ניכוי אוטומטי')
+        ));
+      } else {
+        card.appendChild(h('div',{style:{marginTop:'8px',paddingTop:'8px',borderTop:'0.5px solid var(--border)',fontSize:'11px',color:'var(--ok-txt)',fontWeight:'500'}},'✓ כל התשלומים הושלמו'));
+      }
+      instSec.appendChild(card);
+    });
+    el.appendChild(instSec);
+    el.appendChild(h('hr',{class:'divider'}));
+  }
+
+  // Year selector
+  var yearSel=h('select',{onChange:function(){UI.payYear=this.value;renderBody();}});
+  years.forEach(function(y){var o=h('option',{value:y},y);if(y===curYear)o.selected=true;yearSel.appendChild(o);});
+  el.appendChild(h('div',{class:'pay-year-sel'},h('span',{style:{fontSize:'12px',color:'var(--txt2)'}},'שנה:'),yearSel));
+
+  var data=buildMonthlyData(curYear);
+  if(!data.length){el.appendChild(h('div',{class:'empty'},'אין חשבונות לשנה זו.'));return;}
+
+  var totalPaid=data.reduce(function(s,m){return s+m.paid;},0);
+  var totalUnpaid=data.reduce(function(s,m){return s+m.unpaid;},0);
+  var totalAll=totalPaid+totalUnpaid;
+  var maxMonth=Math.max.apply(null,data.map(function(m){return m.paid+m.unpaid;}));
+
+  el.appendChild(h('div',{class:'pay-summary-grid'},
+    h('div',{class:'stat'},h('div',{class:'stat-lbl'},'סה"כ '+curYear),h('div',{class:'stat-val'},totalAll.toLocaleString()+'₪')),
+    h('div',{class:'stat'},h('div',{class:'stat-lbl'},'שולם'),h('div',{class:'stat-val',style:{color:'var(--ok-txt)'}},totalPaid.toLocaleString()+'₪')),
+    h('div',{class:'stat'},h('div',{class:'stat-lbl'},'ממתין'),h('div',{class:'stat-val',style:{color:'var(--warn-txt)'}},totalUnpaid.toLocaleString()+'₪'))
+  ));
+
+  el.appendChild(h('div',{class:'pay-legend'},
+    h('div',{class:'pay-legend-item'},h('div',{class:'pay-legend-dot',style:{background:'var(--green)'}}),h('span',{},'שולם')),
+    h('div',{class:'pay-legend-item'},h('div',{class:'pay-legend-dot',style:{background:'#BA7517'}}),h('span',{},'ממתין לתשלום'))
+  ));
+
+  data.forEach(function(m){
+    var total=m.paid+m.unpaid;
+    var paidPct=total?Math.round(m.paid/maxMonth*100):0;
+    var unpaidPct=total?Math.round(m.unpaid/maxMonth*100):0;
+    var expanded=UI.expandedMonth===m.key;
+
+    var header=h('div',{class:'pay-month-header',onClick:function(){UI.expandedMonth=expanded?null:m.key;renderBody();}},
+      h('div',{style:{display:'flex',alignItems:'center',gap:'8px'}},
+        h('div',{class:'pay-month-title'},monthLabel(m.key)),
+        m.unpaid>0?h('span',{class:'badge b-due'},'ממתין ₪'+m.unpaid.toLocaleString()):h('span',{class:'badge b-ok'},'שולם')
+      ),
+      h('div',{style:{display:'flex',alignItems:'center',gap:'8px'}},
+        h('div',{class:'pay-month-total'},'₪'+total.toLocaleString()),
+        h('span',{style:{fontSize:'11px',color:'var(--txt3)'}},expanded?'▲':'▼')
+      )
+    );
+    var barWrap=h('div',{class:'month-bar-wrap'});
+    if(m.paid>0)barWrap.appendChild(h('div',{class:'month-bar-row'},h('div',{class:'month-bar-lbl'},'שולם'),h('div',{class:'month-bar-track'},h('div',{class:'month-bar-fill',style:{width:paidPct+'%'}})),h('div',{class:'month-bar-amt',style:{color:'var(--ok-txt)'}},'₪'+m.paid.toLocaleString())));
+    if(m.unpaid>0)barWrap.appendChild(h('div',{class:'month-bar-row'},h('div',{class:'month-bar-lbl'},'ממתין'),h('div',{class:'month-bar-track'},h('div',{class:'month-bar-fill unpaid',style:{width:unpaidPct+'%'}})),h('div',{class:'month-bar-amt',style:{color:'var(--warn-txt)'}},'₪'+m.unpaid.toLocaleString())));
+
+    var wrapper=h('div',{style:{marginBottom:'8px'}},header,barWrap);
+    if(expanded){
+      var body=h('div',{class:'pay-month-body'});
+      var bl=h('div',{class:'bill-list'});
+      m.bills.forEach(function(b){
+        var bs=bStatus(b);
+        var instBadge=b.installmentGroupId?h('span',{class:'badge badge-inst',style:{fontSize:'10px'}},b.installmentCurrent+'/'+b.installmentTotal+(b.cardLast4?' ****'+b.cardLast4:'')):null;
+        var autoTag=b.autoDebit?h('span',{style:{fontSize:'10px',color:'var(--txt3)'}},'💳'):null;
+        bl.appendChild(h('div',{class:'bill-row'},
+          h('div',{style:{flex:'1'}},
+            h('div',{class:'bill-name',style:{textDecoration:b.isPaid?'line-through':'none',opacity:b.isPaid?'0.6':'1'}},btL(b.type)+(b.description?' · '+b.description:'')),
+            h('div',{class:'bill-period'},fmtD(b.dueDate))
+          ),
+          h('div',{class:'bill-amt'},'₪'+b.amount.toLocaleString()),
+          instBadge,autoTag,
+          b.isPaid?h('span',{class:'badge b-paid'},'שולם'):bs.cls?h('span',{class:'badge b-'+bs.cls},bs.lbl):null,
+          !b.isPaid&&!b.autoDebit?h('button',{class:'btn-sm',style:{fontSize:'10px',color:'var(--ok-txt)'},onClick:(function(id){return function(){togglePaid(id);};})(b.id)},'✓ שולם'):null
+        ));
+      });
+      body.appendChild(bl);wrapper.appendChild(body);
+    }
+    el.appendChild(wrapper);
+  });
+}
+/* ====================== DASHBOARD ====================== */
+function buildDashboard(el){
+  var expCnt=0,warnCnt=0;DB.products.forEach(function(p){var d=daysUntil(p.warrantyEnd);if(d!==null&&d<0)expCnt++;else if(d!==null&&d<=90)warnCnt++;});
+  var totalU=DB.bills.filter(function(b){return !b.isPaid;}).reduce(function(s,b){return s+b.amount;},0);
+  var totalInstRemain=DB.bills.filter(function(b){return b.installmentGroupId&&!b.isPaid;}).reduce(function(s,b){return s+b.amount;},0);
+  var allGroups=getInstallmentGroups();
+  var activeGroups=allGroups.filter(function(g){return g.paidCount<g.totalCount;});
+  el.appendChild(h('div',{class:'stats-grid'},h('div',{class:'stat'},h('div',{class:'stat-lbl'},'מוצרים'),h('div',{class:'stat-val'},''+DB.products.length)),h('div',{class:'stat'},h('div',{class:'stat-lbl'},'אחריות פגה'),h('div',{class:'stat-val'},''+expCnt)),h('div',{class:'stat'},h('div',{class:'stat-lbl'},"פגה תוך 90י'"),h('div',{class:'stat-val'},''+warnCnt)),h('div',{class:'stat'},h('div',{class:'stat-lbl'},'לתשלום (₪)'),h('div',{class:'stat-val'},totalU?totalU.toLocaleString():'0'))));
+  if(activeGroups.length){
+    el.appendChild(h('div',{style:{background:'var(--info-bg)',border:'0.5px solid rgba(24,95,165,0.2)',borderRadius:'var(--rl)',padding:'13px 16px',marginBottom:'14px',display:'flex',alignItems:'center',justifyContent:'space-between',flexWrap:'wrap',gap:'10px'}},
+      h('div',{},
+        h('div',{style:{fontSize:'11px',color:'var(--info-txt)',fontWeight:'500',marginBottom:'3px'}},'💳 יתרת תשלומים פתוחים'),
+        h('div',{style:{display:'flex',alignItems:'baseline',gap:'6px'}},
+          h('div',{style:{fontSize:'26px',fontWeight:'500',color:'var(--info-txt)'}},'₪'+totalInstRemain.toLocaleString()),
+          h('div',{style:{fontSize:'12px',color:'var(--info-txt)',opacity:'0.7'}},activeGroups.length+' עסקאות פעילות')
+        )
+      ),
+      h('div',{style:{display:'flex',flexDirection:'column',gap:'5px',minWidth:'150px'}},
+        activeGroups.map(function(g){
+          var left=g.totalCount-g.paidCount;
+          return h('div',{style:{display:'flex',justifyContent:'space-between',alignItems:'center',gap:'6px'}},
+            h('div',{style:{fontSize:'11px',color:'var(--info-txt)',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap',maxWidth:'100px'}},btL(g.type)+(g.cardLast4?' ****'+g.cardLast4:'')),
+            h('div',{style:{fontSize:'11px',fontWeight:'500',color:'var(--info-txt)',flexShrink:'0'}},'₪'+(left*g.amountPerInst).toLocaleString()+' ('+left+'/'+g.totalCount+')')
+          );
+        }).concat([h('button',{class:'btn-sm',style:{marginTop:'2px',fontSize:'10px',color:'var(--info-txt)',borderColor:'rgba(24,95,165,0.3)'},onClick:function(){UI.view='payments';renderBody();}},'לפירוט ←')])
+      )
+    ));
+  }
+  var alerts=[];
+  DB.products.forEach(function(p){var d=daysUntil(p.warrantyEnd);if(d!==null&&d<0)alerts.push({t:'danger',title:'אחריות פגה: '+p.name,sub:fmtD(p.warrantyEnd)});});
+  DB.products.filter(function(p){var d=daysUntil(p.warrantyEnd);return d!==null&&d>=0&&d<=90;}).sort(function(a,b){return daysUntil(a.warrantyEnd)-daysUntil(b.warrantyEnd);}).forEach(function(p){alerts.push({t:'warn',title:'פגה בעוד '+daysUntil(p.warrantyEnd)+' ימים: '+p.name,sub:fmtD(p.warrantyEnd)});});
+  DB.bills.forEach(function(b){if(!b.isPaid){var d=daysUntil(b.dueDate);if(d!==null&&d<0)alerts.push({t:'danger',title:'חשבון באיחור: '+btL(b.type),sub:'₪'+b.amount.toLocaleString()});else if(d!==null&&d>=0&&d<=7)alerts.push({t:'warn',title:'חשבון לתשלום: '+btL(b.type)+' ('+d+' ימים)',sub:'₪'+b.amount.toLocaleString()});}});
+  el.appendChild(h('div',{class:'section-hdr'},h('div',{class:'sec-title'},alerts.length?'התראות ('+alerts.length+')':'סטטוס'),alerts.length?h('span',{class:'badge b-exp'},''+alerts.length):null));
+  if(!alerts.length)el.appendChild(h('div',{style:{background:'var(--bg2)',borderRadius:'var(--rl)',padding:'14px 16px',fontSize:'13px',color:'var(--txt2)'}},'הכל תקין! אין התראות.'));
+  else alerts.forEach(function(a){el.appendChild(h('div',{class:'alert-item a-'+a.t},h('div',{},h('div',{class:'a-title'},a.title),h('div',{class:'a-sub'},a.sub))));});
+  if(DB.products.length){el.appendChild(h('hr',{class:'divider'}));el.appendChild(h('div',{class:'section-hdr'},h('div',{class:'sec-title'},'מוצרים — קרובים לפקיעה'),h('button',{class:'btn-add',onClick:function(){UI.view='products';renderBody();}},'כולם')));var s=DB.products.slice().sort(function(a,b){var da=daysUntil(a.warrantyEnd)||99999,db=daysUntil(b.warrantyEnd)||99999;return da-db;}).slice(0,4);var g=h('div',{class:'cards-grid'});s.forEach(function(p){buildProdCard(g,p,true);});el.appendChild(g);}
+  if(DB.bills.length){
+    el.appendChild(h('hr',{class:'divider'}));
+    el.appendChild(h('div',{class:'section-hdr'},h('div',{class:'sec-title'},'סיכום תשלומים — '+new Date().getFullYear()),h('button',{class:'btn-add',onClick:function(){UI.view='payments';renderBody();}},'פירוט')));
+    var curYearStr=String(new Date().getFullYear());
+    var mData=buildMonthlyData(curYearStr);
+    var maxV=mData.length?Math.max.apply(null,mData.map(function(m){return m.paid+m.unpaid;})):1;
+    if(!mData.length){el.appendChild(h('div',{style:{fontSize:'13px',color:'var(--txt2)',padding:'6px 0'}},'אין נתונים לשנה הנוכחית.'));}
+    else{
+      var chartWrap=h('div',{style:{background:'var(--bg)',border:'0.5px solid var(--border)',borderRadius:'var(--rl)',padding:'14px 16px'}});
+      mData.slice(-6).forEach(function(m){
+        var total=m.paid+m.unpaid;
+        var paidPct=Math.round(m.paid/maxV*100);
+        var unpaidPct=Math.round(m.unpaid/maxV*100);
+        chartWrap.appendChild(h('div',{class:'month-bar-row',style:{marginBottom:'7px'}},
+          h('div',{class:'month-bar-lbl',style:{minWidth:'56px',fontSize:'11px'}},monthLabel(m.key).split(' ')[0]),
+          h('div',{class:'month-bar-track',style:{height:'16px'}},
+            h('div',{style:{height:'100%',display:'flex',borderRadius:'4px',overflow:'hidden'}},
+              m.paid>0?h('div',{style:{width:paidPct+'%',background:'var(--green)',transition:'width 0.4s'}}):null,
+              m.unpaid>0?h('div',{style:{width:unpaidPct+'%',background:'#BA7517',transition:'width 0.4s'}}):null
+            )
+          ),
+          h('div',{class:'month-bar-amt',style:{fontSize:'11px',minWidth:'64px'}},'₪'+total.toLocaleString())
+        ));
+      });
+      var totPaid=mData.reduce(function(s,m){return s+m.paid;},0);
+      var totUnpaid=mData.reduce(function(s,m){return s+m.unpaid;},0);
+      chartWrap.appendChild(h('div',{style:{display:'flex',gap:'12px',marginTop:'10px',paddingTop:'8px',borderTop:'0.5px solid var(--border)',flexWrap:'wrap'}},
+        h('div',{class:'pay-legend-item'},h('div',{class:'pay-legend-dot',style:{background:'var(--green)'}}),h('span',{},'שולם ₪'+totPaid.toLocaleString())),
+        h('div',{class:'pay-legend-item'},h('div',{class:'pay-legend-dot',style:{background:'#BA7517'}}),h('span',{},'ממתין ₪'+totUnpaid.toLocaleString()))
+      ));
+      el.appendChild(chartWrap);
+    }
+  }
+}
+
+/* ====================== PRODUCTS ====================== */
+function buildProducts(el){
+  el.appendChild(h('div',{class:'section-hdr'},
+    h('div',{class:'sec-title'},'מוצרים ('+DB.products.length+')'),
+    h('div',{class:'hdr-btns'},
+      h('button',{class:'btn-scan',onClick:openScan},'📷 סרוק קבלה'),
+      h('button',{class:'btn-add',onClick:function(){UI.editing=null;UI.view='add_product';renderBody();}},'+ הוסף ידנית')
+    )
+  ));
+  if(!DB.products.length){el.appendChild(h('div',{class:'empty'},'אין מוצרים עדיין.'));return;}
+  var sorted=DB.products.slice().sort(function(a,b){var da=daysUntil(a.warrantyEnd)||99999,db=daysUntil(b.warrantyEnd)||99999;return da-db;});
+  var g=h('div',{class:'cards-grid'});sorted.forEach(function(p){buildProdCard(g,p,false);});el.appendChild(g);
+}
+function buildProdCard(container,p,compact){
+  var ws=wStatus(p.warrantyEnd);var pct=null;if(p.purchaseDate&&p.warrantyEnd&&ws.d!==null){var tm=new Date(p.warrantyEnd)-new Date(p.purchaseDate),em=new Date()-new Date(p.purchaseDate);pct=Math.max(0,Math.min(100,Math.round(em/tm*100)));}
+  var fc=ws.cls==='ok'?'#1D9E75':ws.cls==='warn'?'#BA7517':'#E24B4A';
+  var meta=[p.purchaseDate?'נרכש: '+fmtD(p.purchaseDate):'',p.store,p.price?'₪'+p.price:''].filter(Boolean).join(' · ');
+  container.appendChild(h('div',{class:'prod-card'},
+    h('div',{class:'prod-name'},p.name),h('div',{class:'prod-sub'},catL(p.category)+(p.model?' · '+p.model:'')),
+    ws.cls?h('span',{class:'badge b-'+ws.cls},ws.cls==='exp'?'אחריות פגה':'נותרו '+ws.lbl):null,
+    pct!==null?h('div',{class:'wbar'},h('div',{class:'wfill',style:{width:pct+'%',background:fc}})):null,
+    !compact?h('div',{class:'prod-meta'},meta):null,
+    !compact?h('div',{class:'prod-meta'},'אחריות עד: '+fmtD(p.warrantyEnd)+(p.serialNumber?' · סריאל: '+p.serialNumber:'')):null,
+    h('div',{class:'prod-acts'},
+      h('button',{class:'btn-sm btn-doc',onClick:(function(prod){return function(){openViewer(prod,'product');};})(p)},'📎 מסמכים'),
+      h('button',{class:'btn-sm',onClick:(function(prod){return function(){openViewer(prod,'product');};})(p)},'פרטים'),
+      !compact?h('button',{class:'btn-sm',onClick:(function(prod){return function(){UI.editing=prod;UI.view='edit_product';renderBody();};})(p)},'עריכה'):null,
+      !compact?h('button',{class:'btn-sm btn-del',onClick:(function(id){return function(){if(confirm('למחוק?'))delProduct(id);};})(p.id)},'מחק'):null
+    )
+  ));
+}
+
+/* ====================== BILLS ====================== */
+function buildBills(el){
+  el.appendChild(h('div',{class:'section-hdr'},
+    h('div',{class:'sec-title'},'חשבונות ('+DB.bills.length+')'),
+    h('div',{class:'hdr-btns'},
+      h('button',{class:'btn-scan',onClick:openScan},'📷 סרוק חשבון'),
+      h('button',{class:'btn-add',onClick:function(){UI.editing=null;UI.view='add_bill';renderBody();}},'+ הוסף ידנית')
+    )
+  ));
+  if(!DB.bills.length){el.appendChild(h('div',{class:'empty'},'אין חשבונות.'));return;}
+  var sorted=DB.bills.slice().sort(function(a,b){if(a.isPaid!==b.isPaid)return a.isPaid?1:-1;return a.dueDate.localeCompare(b.dueDate);});
+  var bl=h('div',{class:'bill-list'});
+  sorted.forEach(function(b){var bs=bStatus(b);
+    var instBadge=b.installmentGroupId?h('span',{class:'badge badge-inst',style:{fontSize:'10px',whiteSpace:'nowrap'}},b.installmentCurrent+'/'+b.installmentTotal+(b.cardLast4?' ****'+b.cardLast4:'')):null;
+    bl.appendChild(h('div',{class:'bill-row'},h('div',{style:{flex:'1'}},h('div',{class:'bill-name',style:{textDecoration:b.isPaid?'line-through':'none',opacity:b.isPaid?'0.5':'1'}},btL(b.type)+(b.description?' · '+b.description:'')),h('div',{class:'bill-period'},(b.period?b.period+' · ':'')+' עד '+fmtD(b.dueDate))),h('div',{class:'bill-amt'},'₪'+b.amount.toLocaleString()),instBadge,bs.cls?h('span',{class:'badge b-'+bs.cls},bs.lbl):null,h('div',{style:{display:'flex',gap:'4px'}},h('button',{class:'btn-sm btn-doc',onClick:(function(bill){return function(){openViewer(bill,'bill');};})(b)},'📎'),!b.isPaid?h('button',{class:'btn-sm',style:{fontSize:'10px',color:'var(--ok-txt)'},onClick:(function(id){return function(){togglePaid(id);};})(b.id)},'✓ שולם'):null,h('button',{class:'btn-sm',onClick:(function(bill){return function(){UI.editing=bill;UI.view='edit_bill';renderBody();};})(b)},'✎'),h('button',{class:'btn-sm btn-del',onClick:(function(bill){return function(){delBill(bill.id);};})(b)},'✕'))));
+  });
+  el.appendChild(bl);
+  var tu=DB.bills.filter(function(b){return !b.isPaid;}).reduce(function(s,b){return s+b.amount;},0);
+  if(tu)el.appendChild(h('div',{class:'total-row'},'סה"כ לתשלום: ₪'+tu.toLocaleString()));
+}
+
+/* ====================== SEARCH ====================== */
+function buildSearch(el){
+  var inp=h('input',{type:'text',class:'search-inp',placeholder:'חפש לפי שם, דגם, סריאל, חנות...',value:UI.searchQ||''});
+  el.appendChild(inp);
+  el.appendChild(h('div',{class:'filter-btns'},h('button',{class:'filter-btn'+(UI.searchType==='all'?' on':''),onClick:function(){UI.searchType='all';doSearch();}},'הכל'),h('button',{class:'filter-btn'+(UI.searchType==='products'?' on':''),onClick:function(){UI.searchType='products';doSearch();}},'מוצרים'),h('button',{class:'filter-btn'+(UI.searchType==='bills'?' on':''),onClick:function(){UI.searchType='bills';doSearch();}},'חשבונות')));
+  el.appendChild(h('div',{class:'date-filter'},h('span',{},'תאריך אחריות:'),h('input',{type:'date',class:'date-inp',id:'sdf'}),h('span',{},'עד'),h('input',{type:'date',class:'date-inp',id:'sdt'}),h('button',{class:'btn-add',onClick:doSearch},'חפש')));
+  var res=h('div',{});el.appendChild(res);
+  inp.addEventListener('input',function(){UI.searchQ=inp.value;doSearch();});
+  function doSearch(){res.innerHTML='';var q=(UI.searchQ||'').toLowerCase().trim();var from=(document.getElementById('sdf')||{value:''}).value;var to=(document.getElementById('sdt')||{value:''}).value;var pRes=[],bRes=[];if(UI.searchType!=='bills')pRes=DB.products.filter(function(p){var mq=!q||[p.name,p.model,p.serialNumber,p.store,p.manufacturer,p.notes].some(function(s){return(s||'').toLowerCase().indexOf(q)>=0;});var mf=!from||p.warrantyEnd>=from;var mt=!to||p.warrantyEnd<=to;return mq&&mf&&mt;});if(UI.searchType!=='products')bRes=DB.bills.filter(function(b){var mq=!q||[btL(b.type),b.description,b.notes].some(function(s){return(s||'').toLowerCase().indexOf(q)>=0;});var mf=!from||b.dueDate>=from;var mt=!to||b.dueDate<=to;return mq&&mf&&mt;});if(!pRes.length&&!bRes.length){res.appendChild(h('div',{class:'empty'},'לא נמצאו תוצאות'));return;}if(pRes.length){res.appendChild(h('div',{class:'section-hdr',style:{marginTop:'8px'}},h('div',{class:'sec-title'},'מוצרים ('+pRes.length+')')));var g=h('div',{class:'cards-grid'});pRes.forEach(function(p){buildProdCard(g,p,false);});res.appendChild(g);}if(bRes.length){res.appendChild(h('div',{class:'section-hdr',style:{marginTop:'14px'}},h('div',{class:'sec-title'},'חשבונות ('+bRes.length+')')));var bl2=h('div',{class:'bill-list'});bRes.forEach(function(b){var bs=bStatus(b);bl2.appendChild(h('div',{class:'bill-row'},h('div',{style:{flex:'1'}},h('div',{class:'bill-name'},btL(b.type)+(b.description?' · '+b.description:'')),h('div',{class:'bill-period'},fmtD(b.dueDate))),h('div',{class:'bill-amt'},'₪'+b.amount.toLocaleString()),bs.cls?h('span',{class:'badge b-'+bs.cls},bs.lbl):null,h('button',{class:'btn-sm btn-doc',onClick:(function(bill){return function(){openViewer(bill,'bill');};})(b)},'📎')));});res.appendChild(bl2);}}
+  doSearch();
+}
+
+/* ====================== FORMS ====================== */
+function buildProductForm(){
+  var isEdit=UI.view==='edit_product',p=isEdit?UI.editing:{};var wrap=h('div',{});
+  wrap.appendChild(h('div',{class:'section-hdr'},h('div',{class:'sec-title'},isEdit?'עריכה: '+p.name:'הוספת מוצר חדש')));
+  var form=h('div',{class:'form-wrap'});
+  function field(lbl,inp,hint){var f=h('div',{class:'field'},h('label',{},lbl),inp);if(hint)f.appendChild(h('div',{class:'hint'},hint));return f;}
+  var nm=h('input',{type:'text',value:p.name||'',placeholder:'לדוגמה: מדיח כלים'});var md=h('input',{type:'text',value:p.model||'',placeholder:'SMS46II01'});var mf=h('input',{type:'text',value:p.manufacturer||'',placeholder:'Bosch'});var sn=h('input',{type:'text',value:p.serialNumber||''});
+  var cat=h('select',{});CATS.forEach(function(c){var o=h('option',{value:c.id},c.l);if(p.category===c.id)o.selected=true;cat.appendChild(o);});
+  var st=h('input',{type:'text',value:p.store||''});var pr=h('input',{type:'number',value:p.price||''});var pd=h('input',{type:'date',value:p.purchaseDate||todayS()});var wy=h('input',{type:'number',value:'',min:'0',max:'20',step:'1'});var we=h('input',{type:'date',value:p.warrantyEnd||''});
+  function calcW(){if(!wy.value)return;var d=new Date(pd.value||todayS());d.setFullYear(d.getFullYear()+parseInt(wy.value));we.value=d.toISOString().slice(0,10);}
+  wy.addEventListener('change',calcW);pd.addEventListener('change',calcW);
+  var nt=h('textarea',{placeholder:'הערות...'},p.notes||'');
+  form.appendChild(field('שם המוצר *',nm));form.appendChild(h('div',{class:'form-row'},field('דגם',md),field('יצרן',mf)));form.appendChild(field('מספר סריאלי',sn));form.appendChild(field('קטגוריה',cat));form.appendChild(h('div',{class:'form-row'},field('חנות',st),field('מחיר (₪)',pr)));form.appendChild(h('div',{class:'form-row'},field('תאריך רכישה',pd),field('שנות אחריות',wy,'← מחשב תאריך')));form.appendChild(field('תאריך סיום אחריות',we));form.appendChild(field('הערות',nt));
+  var errEl=h('div',{class:'err'});form.appendChild(errEl);
+  form.appendChild(h('div',{style:{display:'flex',gap:'8px',marginTop:'16px'}},h('button',{class:'btn-primary',onClick:function(){if(!nm.value.trim()){errEl.textContent='נא להזין שם';return;}var data={name:nm.value.trim(),model:md.value.trim(),manufacturer:mf.value.trim(),serialNumber:sn.value.trim(),category:cat.value,store:st.value.trim(),price:parseFloat(pr.value)||0,purchaseDate:pd.value,warrantyEnd:we.value,notes:nt.value.trim()};if(isEdit)DB.products=DB.products.map(function(x){return x.id===p.id?Object.assign({},x,data):x;});else DB.products.push(Object.assign({},data,{id:uid(),createdAt:new Date().toISOString()}));saveDB();UI.view='products';UI.editing=null;render();}},isEdit?'שמור':'הוסף מוצר'),h('button',{class:'btn-cancel',onClick:function(){UI.view='products';UI.editing=null;renderBody();}},'ביטול')));
+  wrap.appendChild(form);return wrap;
+}
+/* ====================== INSTALLMENT HELPERS ====================== */
+function getInstallmentGroups(){
+  var groups={};
+  DB.bills.forEach(function(b){
+    if(!b.installmentGroupId)return;
+    if(!groups[b.installmentGroupId])groups[b.installmentGroupId]={bills:[],groupId:b.installmentGroupId,description:b.description,type:b.type,cardLast4:b.cardLast4,installmentTotal:b.installmentTotal,amountPerInst:b.amount};
+    groups[b.installmentGroupId].bills.push(b);
+  });
+  return Object.values(groups).map(function(g){
+    g.bills.sort(function(a,b){return a.dueDate.localeCompare(b.dueDate);});
+    g.paidCount=g.bills.filter(function(b){return b.isPaid;}).length;
+    g.totalCount=g.bills.length;
+    g.totalAmount=g.bills.reduce(function(s,b){return s+b.amount;},0);
+    g.paidAmount=g.bills.filter(function(b){return b.isPaid;}).reduce(function(s,b){return s+b.amount;},0);
+    g.nextUnpaid=g.bills.find(function(b){return !b.isPaid;})||null;
+    return g;
+  });
+}
+
+function createInstallmentBills(data,startDate,numInst,cardLast4,amtPerInst){
+  var groupId=uid();
+  for(var i=0;i<numInst;i++){
+    var d=new Date(startDate);d.setMonth(d.getMonth()+i);
+    var dateStr=d.toISOString().slice(0,10);
+    DB.bills.push(Object.assign({},data,{
+      id:uid(),createdAt:new Date().toISOString(),
+      dueDate:dateStr,
+      amount:amtPerInst,
+      isPaid:false,
+      autoDebit:true,
+      period:HEB_MONTHS[d.getMonth()]+' '+d.getFullYear(),
+      installmentGroupId:groupId,
+      installmentTotal:numInst,
+      installmentCurrent:i+1,
+      cardLast4:cardLast4,
+      description:(data.description||'')+(data.description?' ':'')+'תשלום '+(i+1)+'/'+numInst
+    }));
+  }
+}
+
+function applyAutoDebits(){
+  var today=todayS();var changed=false;
+  DB.bills=DB.bills.map(function(b){
+    if(b.autoDebit&&!b.isPaid&&b.dueDate&&b.dueDate<=today){changed=true;return Object.assign({},b,{isPaid:true});}
+    return b;
+  });
+  if(changed)saveDB();
+}
+
+/* ====================== BILL FORM ====================== */
+function buildBillForm(){
+  var isEdit=UI.view==='edit_bill',b=isEdit?UI.editing:{};var wrap=h('div',{});
+  wrap.appendChild(h('div',{class:'section-hdr'},h('div',{class:'sec-title'},isEdit?'עריכת חשבון':'הוספת חשבון')));
+  var form=h('div',{class:'form-wrap'});
+  function field(lbl,inp,hint){var f=h('div',{class:'field'},h('label',{},lbl),inp);if(hint)f.appendChild(h('div',{class:'hint'},hint));return f;}
+  var tp=h('select',{});BTYPES.forEach(function(t){var o=h('option',{value:t.id},t.l);if(b.type===t.id)o.selected=true;tp.appendChild(o);});
+  var ds=h('input',{type:'text',value:b.description||'',placeholder:'תיאור / ספק'});
+  var am=h('input',{type:'number',value:b.amount||'',placeholder:'0'});
+  var dd=h('input',{type:'date',value:b.dueDate||todayS()});
+  var pe=h('input',{type:'text',value:b.period||'',placeholder:'ינואר 2025'});
+  var pc=h('input',{type:'checkbox',checked:b.isPaid||false});
+  var nt=h('textarea',{placeholder:'הערות...'},b.notes||'');
+
+  // Installment fields
+  var isInstall=!isEdit&&false;
+  var toggleSw=h('div',{class:'toggle-sw'+(isInstall?' on':'')});
+  var instBox=h('div',{class:'inst-form-box',style:{display:'none'}});
+  var numInstInp=h('input',{type:'number',value:'6',min:'2',max:'60',step:'1',placeholder:'מספר תשלומים'});
+  var cardInp=h('input',{type:'text',value:'',maxlength:'4',placeholder:'4 ספרות אחרונות',style:{letterSpacing:'3px',maxWidth:'130px'}});
+  var amtPerEl=h('div',{style:{fontSize:'12px',color:'var(--txt2)',marginTop:'4px'}});
+
+  function updateAmtPer(){
+    var total=parseFloat(am.value)||0;var n=parseInt(numInstInp.value)||1;
+    if(total>0&&n>0)amtPerEl.textContent='₪'+Math.round(total/n).toLocaleString()+' לתשלום × '+n+' תשלומים';
+    else amtPerEl.textContent='';
+  }
+  am.addEventListener('input',updateAmtPer);numInstInp.addEventListener('input',updateAmtPer);
+
+  instBox.appendChild(h('div',{style:{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'10px'}},
+    h('div',{class:'field'},h('label',{},'מספר תשלומים'),numInstInp),
+    h('div',{class:'field'},h('label',{},'4 ספרות אחרונות כרטיס'),cardInp)
+  ));
+  instBox.appendChild(amtPerEl);
+
+  var toggleRow=h('div',{class:'inst-toggle',onClick:function(){
+    isInstall=!isInstall;
+    if(isInstall){toggleSw.classList.add('on');instBox.style.display='block';}
+    else{toggleSw.classList.remove('on');instBox.style.display='none';}
+  }},toggleSw,h('div',{class:'inst-toggle-lbl'},'פריסה בתשלומים'));
+
+  form.appendChild(field('סוג חשבון',tp));
+  form.appendChild(field('ספק / תיאור',ds));
+  form.appendChild(h('div',{class:'form-row'},
+    field(isInstall?'סכום כולל (₪)':'סכום (₪)',am),
+    field('תאריך תשלום ראשון',dd)
+  ));
+  if(!isEdit)form.appendChild(toggleRow);
+  if(!isEdit)form.appendChild(instBox);
+  form.appendChild(field('תקופה',pe));
+  form.appendChild(field('הערות',nt));
+  if(!isEdit||!b.installmentGroupId)form.appendChild(h('div',{class:'field',style:{display:'flex',alignItems:'center',gap:'8px'}},pc,h('label',{style:{margin:'0',cursor:'pointer'},onClick:function(){pc.checked=!pc.checked;}},'שולם')));
+
+  var errEl=h('div',{class:'err'});form.appendChild(errEl);
+  form.appendChild(h('div',{style:{display:'flex',gap:'8px',marginTop:'16px'}},
+    h('button',{class:'btn-primary',onClick:function(){
+      if(!am.value){errEl.textContent='נא להזין סכום';return;}
+      var data={type:tp.value,description:ds.value.trim(),notes:nt.value.trim(),period:pe.value.trim()};
+      if(isInstall&&!isEdit){
+        var n=parseInt(numInstInp.value)||1;
+        if(n<2||n>60){errEl.textContent='נא להזין מספר תשלומים בין 2 ל-60';return;}
+        var card=cardInp.value.trim();
+        if(card&&card.length!==4){errEl.textContent='נא להזין בדיוק 4 ספרות';return;}
+        var total=parseFloat(am.value)||0;
+        var perInst=Math.round(total/n);
+        createInstallmentBills(data,dd.value,n,card,perInst);
+      } else {
+        var billData=Object.assign({},data,{amount:parseFloat(am.value)||0,dueDate:dd.value,isPaid:pc.checked});
+        if(isEdit)DB.bills=DB.bills.map(function(x){return x.id===b.id?Object.assign({},x,billData):x;});
+        else DB.bills.push(Object.assign({},billData,{id:uid(),createdAt:new Date().toISOString()}));
+      }
+      saveDB();UI.view='bills';UI.editing=null;render();
+    }},isEdit?'שמור שינויים':isInstall?'צור תוכנית תשלומים':'הוסף חשבון'),
+    h('button',{class:'btn-cancel',onClick:function(){UI.view='bills';UI.editing=null;renderBody();}},'ביטול')
+  ));
+  wrap.appendChild(form);return wrap;
+}
+function delProduct(id){DB.products=DB.products.filter(function(p){return p.id!==id;});saveDB();render();}
+function delBill(id){
+  var bill=DB.bills.find(function(b){return b.id===id;});
+  if(bill&&bill.installmentGroupId){
+    var groupId=bill.installmentGroupId;
+    var groupBills=DB.bills.filter(function(b){return b.installmentGroupId===groupId;});
+    var paid=groupBills.filter(function(b){return b.isPaid;}).length;
+    var total=groupBills.length;
+    var msg='מחיקת עסקת התשלומים כולה:\n'+btL(bill.type)+(bill.cardLast4?' (****'+bill.cardLast4+')':'')+'\n'+total+' תשלומים ('+paid+' שולמו)\n\nהאם למחוק את כל העסקה?';
+    if(confirm(msg)){
+      DB.bills=DB.bills.filter(function(b){return b.installmentGroupId!==groupId;});
+      saveDB();render();
+    }
+  } else {
+    if(confirm('למחוק חשבון זה?')){DB.bills=DB.bills.filter(function(b){return b.id!==id;});saveDB();render();}
+  }
+}
+function togglePaid(id){DB.bills=DB.bills.map(function(b){return b.id===id?Object.assign({},b,{isPaid:!b.isPaid}):b;});saveDB();renderBody();}
+loadDB();applyAutoDebits();render();
+</script>
+</body>
+</html>
