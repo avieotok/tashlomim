@@ -3,6 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="מנהל הבית">
+<meta name="theme-color" content="#1D9E75">
+<link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%231D9E75'/><path d='M50 12L15 42h14v46h18V64h6v24h18V42h14L50 12z' fill='white'/></svg>">
 <title>מנהל הבית</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
@@ -348,35 +353,78 @@ function openSettings(){
   adminBox.appendChild(h('div',{class:'settings-title'},'🔧 מנהל מערכת'));
   adminBox.appendChild(h('div',{class:'settings-sub'},'פעולות אדמין — שים לב: פעולות אלו אינן הפיכות'));
 
+  // Backup
+  adminBox.appendChild(h('div',{style:{marginTop:'10px',marginBottom:'4px',fontSize:'12px',fontWeight:'500',color:'var(--txt)'}},'💾 גיבוי נתונים'));
+  adminBox.appendChild(h('div',{style:{fontSize:'11px',color:'var(--txt2)',marginBottom:'7px'}},'הורד קובץ גיבוי של כל המוצרים, החשבונות והמסמכים'));
+  adminBox.appendChild(h('button',{
+    style:{padding:'7px 16px',background:'var(--ok-bg)',border:'0.5px solid rgba(59,109,17,0.3)',borderRadius:'var(--r)',cursor:'pointer',fontSize:'12px',fontFamily:'inherit',color:'var(--ok-txt)',fontWeight:'500',marginBottom:'14px'},
+    onClick:function(){
+      var backup={version:2,date:new Date().toISOString(),products:DB.products,bills:DB.bills,btypes:BTYPES,docs:{}};
+      // Collect all docs
+      for(var i=0;i<localStorage.length;i++){
+        var k=localStorage.key(i);
+        if(k&&k.indexOf('docs_')===0){try{backup.docs[k]=JSON.parse(localStorage.getItem(k));}catch(e){}}
+      }
+      var json=JSON.stringify(backup,null,2);
+      var blob=new Blob([json],{type:'application/json'});
+      var url=URL.createObjectURL(blob);
+      var a=document.createElement('a');
+      a.href=url;a.download='מנהל_הבית_גיבוי_'+new Date().toISOString().slice(0,10)+'.json';
+      document.body.appendChild(a);a.click();document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      showToast('גיבוי הורד בהצלחה!');
+    }
+  },'⬇ הורד גיבוי'));
+
+  // Restore
+  adminBox.appendChild(h('div',{style:{fontSize:'12px',fontWeight:'500',color:'var(--txt)',marginBottom:'4px'}},'📂 שיחזור מגיבוי'));
+  adminBox.appendChild(h('div',{style:{fontSize:'11px',color:'var(--txt2)',marginBottom:'7px'}},'טען קובץ גיבוי — ישחזר את כל הנתונים (ידרוס נתונים קיימים)'));
+  var restoreInp=h('input',{type:'file',style:{display:'none'},accept:'.json'});
+  var restoreStatus=h('div',{style:{fontSize:'11px',marginTop:'5px',minHeight:'16px'}});
+  restoreInp.addEventListener('change',function(){
+    var file=restoreInp.files[0];if(!file)return;
+    var reader=new FileReader();
+    reader.onload=function(ev){
+      try{
+        var data=JSON.parse(ev.target.result);
+        if(!data.products||!data.bills)throw new Error('קובץ גיבוי לא תקין');
+        if(!confirm('שיחזור יחליף את כל הנתונים הקיימים. להמשיך?'))return;
+        DB.products=data.products||[];
+        DB.bills=data.bills||[];
+        if(data.btypes){BTYPES=data.btypes;saveBtypes();}
+        if(data.docs){Object.keys(data.docs).forEach(function(k){localStorage.setItem(k,JSON.stringify(data.docs[k]));});}
+        saveDB();closeModal();render();
+        showToast('שיחזור הושלם בהצלחה! '+DB.products.length+' מוצרים, '+DB.bills.length+' חשבונות');
+      }catch(e){
+        restoreStatus.textContent='שגיאה: '+e.message;restoreStatus.style.color='var(--red-txt)';
+      }
+    };
+    reader.readAsText(file);
+  });
+  adminBox.appendChild(h('button',{
+    style:{padding:'7px 16px',background:'var(--info-bg)',border:'0.5px solid rgba(24,95,165,0.3)',borderRadius:'var(--r)',cursor:'pointer',fontSize:'12px',fontFamily:'inherit',color:'var(--info-txt)',fontWeight:'500'},
+    onClick:function(){restoreInp.click();}
+  },'⬆ טען קובץ גיבוי'));
+  adminBox.appendChild(restoreInp);
+  adminBox.appendChild(restoreStatus);
+
+  // Reset
+  adminBox.appendChild(h('hr',{style:{border:'none',borderTop:'0.5px solid var(--border)',margin:'14px 0'}}));
   var confirmEl=h('div',{style:{display:'none',background:'var(--red-bg)',border:'0.5px solid rgba(163,45,45,0.3)',borderRadius:'var(--r)',padding:'12px',marginTop:'10px'}});
   confirmEl.appendChild(h('div',{style:{fontSize:'13px',fontWeight:'500',color:'var(--red-txt)',marginBottom:'8px'}},'⚠ האם אתה בטוח?'));
   confirmEl.appendChild(h('div',{style:{fontSize:'12px',color:'var(--red-txt)',marginBottom:'10px'}},'פעולה זו תמחק את כל המוצרים, החשבונות, המסמכים וסוגי החשבונות. לא ניתן לשחזר!'));
   confirmEl.appendChild(h('div',{style:{display:'flex',gap:'8px'}},
     h('button',{class:'btn-primary',style:{background:'#A32D2D',fontSize:'12px',padding:'6px 14px'},onClick:function(){
-      // Delete all data from localStorage
       var keysToRemove=[];
-      for(var i=0;i<localStorage.length;i++){
-        var k=localStorage.key(i);
-        if(k&&k.indexOf('hm_')===0)keysToRemove.push(k);
-      }
-      // Also remove document keys
-      for(var i=0;i<localStorage.length;i++){
-        var k=localStorage.key(i);
-        if(k&&k.indexOf('docs_')===0)keysToRemove.push(k);
-      }
+      for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(k&&(k.indexOf('hm_')===0||k.indexOf('docs_')===0))keysToRemove.push(k);}
       keysToRemove.forEach(function(k){localStorage.removeItem(k);});
-      DB.products=[];DB.bills=[];
-      loadBtypes();
-      closeModal();
-      UI.view='dashboard';
-      render();
+      DB.products=[];DB.bills=[];loadBtypes();closeModal();UI.view='dashboard';render();
       showToast('כל הנתונים נמחקו בהצלחה');
     }},'כן, מחק הכל'),
     h('button',{class:'btn-cancel',style:{fontSize:'12px'},onClick:function(){confirmEl.style.display='none';}},'ביטול')
   ));
-
   adminBox.appendChild(h('button',{
-    style:{padding:'7px 16px',background:'transparent',border:'0.5px solid rgba(163,45,45,0.5)',borderRadius:'var(--r)',cursor:'pointer',fontSize:'12px',fontFamily:'inherit',color:'var(--red-txt)',marginTop:'6px'},
+    style:{padding:'7px 16px',background:'transparent',border:'0.5px solid rgba(163,45,45,0.5)',borderRadius:'var(--r)',cursor:'pointer',fontSize:'12px',fontFamily:'inherit',color:'var(--red-txt)'},
     onClick:function(){confirmEl.style.display=confirmEl.style.display==='none'?'block':'none';}
   },'🗑 אפס את כל הנתונים'));
   adminBox.appendChild(confirmEl);
@@ -640,7 +688,20 @@ function buildViewerModal(){
   var item=UI.viewer.item,kind=UI.viewer.kind;
   var name=kind==='product'?item.name:(btL(item.type)+(item.description?' · '+item.description:''));
   var panel=document.getElementById('modal-panel');panel.innerHTML='';
-  panel.appendChild(h('div',{class:'modal-header'},h('div',{class:'modal-title'},name),h('button',{class:'btn-sm',onClick:closeModal},'✕ סגור')));
+  panel.appendChild(h('div',{class:'modal-header'},
+    h('div',{class:'modal-title'},name),
+    h('div',{style:{display:'flex',gap:'6px',alignItems:'center'}},
+      h('button',{class:'btn-sm btn-del',style:{fontSize:'11px'},onClick:function(){
+        var item=UI.viewer.item,kind=UI.viewer.kind;
+        if(kind==='product'){
+          if(confirm('למחוק את המוצר "'+item.name+'"?')){closeModal();delProduct(item.id);}
+        } else {
+          delBill(item.id);closeModal();
+        }
+      }},'🗑 מחק'),
+      h('button',{class:'btn-sm',onClick:closeModal},'✕ סגור')
+    )
+  ));
   panel.appendChild(h('div',{class:'modal-tabs'},
     h('button',{class:'vtab'+(UI.viewerTab==='info'?' on':''),onClick:function(){UI.viewerTab='info';buildModalBody(bodyEl);}},'פרטים'),
     h('button',{class:'vtab'+(UI.viewerTab==='docs'?' on':''),onClick:function(){UI.viewerTab='docs';buildModalBody(bodyEl);}},'מסמכים'+(UI.viewerDocs&&UI.viewerDocs.length?' ('+UI.viewerDocs.length+')':''))
